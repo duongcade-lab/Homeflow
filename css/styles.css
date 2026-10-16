@@ -724,6 +724,15 @@ textarea.dump-input::placeholder { color: var(--ink-faint); }
   flex: 1;
   min-width: 0;
 }
+.ai-summary {
+  margin: -2px 0 14px;
+  font-size: 13px; font-weight: 700;
+  color: var(--primary-deep);
+  background: var(--lavender);
+  border-radius: var(--r-pill);
+  padding: 8px 14px;
+  line-height: 1.45;
+}
 
 /* ---------- Success overlay ---------- */
 

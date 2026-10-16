@@ -62,6 +62,7 @@
     rebalanced: false,
     parseResult: null,
     lastDump: "",
+    aiSummary: "",
     plannerDay: TODAY_IDX,
     taskFilter: "all",
     profileKid: null,
@@ -716,6 +717,7 @@ function timeHint(text) {
       <div class="eyebrow">HomeFlow đã hiểu</div>
       <h2 class="h-title">Xác nhận giúp cả nhà nhé 🙌</h2>
       <p class="h-sub">Mỗi việc có <b>người nghĩ và lo</b> (lên kế hoạch, chuẩn bị, nhắc) và <b>người làm</b>. Có thể chỉnh sửa ngay tại đây.</p>
+      ${state.aiSummary ? `<p class="ai-summary">💬 ${esc(state.aiSummary)}</p>` : ""}
 
       <div class="confirm-hero">
         <div class="ch-visual">
@@ -1372,7 +1374,6 @@ function timeHint(text) {
       const ta = $("#dump-input");
       const micBtn = $(".mic");
       const submitDump = (raw) => {
-        state.parseResult = parseDump(raw);
         state.lastDump = raw;
         showView("ai");
         const steps = $$(".ai-step");
@@ -1380,11 +1381,32 @@ function timeHint(text) {
           setTimeout(() => {
             el.classList.add("active");
             setTimeout(() => el.classList.replace("active", "done"), 240);
-          }, 330 * i);
+          }, 305 * i);
         });
-        setTimeout(() => {
+        const animDone = new Promise((res) => setTimeout(res, 312 * AI_STEPS.length + 370));
+        const llm = fetch("/api/parse", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            text: raw,
+            members: MEMBERS.map((m) => ({ id: m.id, name: m.name, role: m.role })),
+          }),
+          signal: AbortSignal.timeout(15000),
+        })
+          .then((r) => (r.ok ? r.json() : Promise.reject(new Error("HTTP " + r.status))))
+          .then((data) => {
+            if (!data || !Array.isArray(data.items) || !data.items.length) throw new Error("empty");
+            state.parseResult = data.items;
+            state.aiSummary = data.summary || "";
+          })
+          .catch(() => {
+            state.parseResult = parseDump(raw);
+            state.aiSummary = "";
+            toast("AI chưa phản hồi — HomeFlow dùng trí tuệ offline 💜");
+          });
+        Promise.all([animDone, llm]).then(() => {
           if (state.view === "ai") showView("confirm");
-        }, 330 * AI_STEPS.length + 540);
+        });
       };
 
       $$(".chip[data-example]").forEach((el) =>
