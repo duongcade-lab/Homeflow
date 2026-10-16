@@ -228,6 +228,66 @@ const DAY_SHORT = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
     }[c]));
   }
 
+  /* ---------- User Guide (5 bước: TALK → UNDERSTAND → PLAN → SHARE → BALANCE) ---------- */
+
+  const GUIDE_STEPS = [
+    { icon: "✨", title: "Nói với HomeFlow", text: "Cứ nói những gì bạn đang phải nhớ. HomeFlow sẽ hiểu và sắp xếp giúp cả nhà.", cta: "Thử nói với HomeFlow", target: "dump" },
+    { icon: "🧠", title: "Planning Owner ≠ Task Owner", text: "Planning Owner = người nhớ, chuẩn bị, lên kế hoạch và điều phối. Task Owner = người trực tiếp thực hiện.", cta: null },
+    { icon: "🗓", title: "Family Planner", text: "Một lịch chung của cả nhà — ai nghĩ, ai làm, ai nhắc đều thấy rõ.", cta: "Xem lịch gia đình", target: "planner" },
+    { icon: "⚖️", title: "Family Balance", text: "Gánh nặng được nhìn thấy, để ai cũng có thể san sẻ.", cta: "Xem Family Balance", target: "balance" },
+    { icon: "✨", title: "Smart Rebalance", text: "Cùng chia sẻ một vài việc để tuần tới nhẹ nhàng hơn.", cta: "Thử Smart Rebalance", target: "rebalance" },
+  ];
+
+  function guideSeen() {
+    try { return localStorage.getItem("hf_guide_seen") === "1"; } catch (e) { return false; }
+  }
+  function markGuideSeen() {
+    try { localStorage.setItem("hf_guide_seen", "1"); } catch (e) {}
+  }
+
+  function showGuide(step) {
+    const g = GUIDE_STEPS[step];
+    const ov = document.createElement("div");
+    ov.className = "guide-overlay";
+    ov.id = "guide-overlay";
+    ov.innerHTML = `
+      <div class="guide-card">
+        <button class="guide-close" id="guide-close" aria-label="Đóng hướng dẫn">✕</button>
+        <div class="guide-progress"><i style="width:${((step + 1) / GUIDE_STEPS.length) * 100}%"></i></div>
+        <div class="guide-icon">${g.icon}</div>
+        <div class="guide-eyebrow">Bước ${step + 1} / ${GUIDE_STEPS.length}</div>
+        <div class="guide-title">${g.title}</div>
+        <div class="guide-text">${g.text}</div>
+        <div class="guide-dots">${GUIDE_STEPS.map((_, i) => `<span class="gd ${i === step ? "on" : ""}"></span>`).join("")}</div>
+        <div class="guide-actions">
+          ${step > 0 ? `<button class="gb-back" id="guide-back">← Quay lại</button>` : ""}
+          ${g.cta
+            ? `<button class="btn-primary gb-cta" id="guide-cta">${g.cta}</button>`
+            : `<button class="btn-primary gb-cta" id="guide-next">Tiếp theo →</button>`}
+        </div>
+        ${g.cta && step < GUIDE_STEPS.length - 1 ? `<button class="guide-next-link" id="guide-next-link">Tiếp theo →</button>` : ""}
+        <button class="guide-skip" id="guide-skip">Bỏ qua hướng dẫn</button>
+      </div>`;
+    document.body.appendChild(ov);
+    const close = () => { ov.remove(); markGuideSeen(); };
+    $("#guide-close").addEventListener("click", close);
+    $("#guide-skip").addEventListener("click", close);
+    const cta = $("#guide-cta");
+    if (cta) {
+      cta.addEventListener("click", () => {
+        const t = g.target;
+        close();
+        if (t) showView(t);
+      });
+    }
+    const next = $("#guide-next");
+    if (next) next.addEventListener("click", () => { ov.remove(); showGuide(step + 1); });
+    const nextLink = $("#guide-next-link");
+    if (nextLink) nextLink.addEventListener("click", () => { ov.remove(); showGuide(step + 1); });
+    const back = $("#guide-back");
+    if (back) back.addEventListener("click", () => { ov.remove(); showGuide(step - 1); });
+  }
+
   /* ---------- Router ---------- */
 
   const VIEWS = {};
@@ -415,6 +475,23 @@ const DAY_SHORT = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
           <strong>Bản tin tuần</strong>
           <span class="q-sub">${state.items.filter((it) => it.done).length} việc đã xong · ${state.items.filter((it) => !it.done).length} việc còn lại</span>
         </button>
+      </div>
+
+      ${!guideSeen() ? `
+      <div class="onboard-card" id="onboard-card">
+        <div class="ob-emoji">💜</div>
+        <div class="ob-body">
+          <strong>Mới dùng HomeFlow?</strong>
+          <span>Khám phá cách cả nhà cùng chia sẻ những việc cần nhớ.</span>
+        </div>
+        <div class="ob-actions">
+          <button class="ob-start" id="ob-start">Bắt đầu</button>
+          <button class="ob-later" id="ob-later">Để sau</button>
+        </div>
+      </div>` : ""}
+
+      <div class="help-row">
+        <button class="help-btn" data-help="guide">💜 Bắt đầu hướng dẫn</button>
       </div>
     `;
   };
@@ -1419,6 +1496,12 @@ function timeHint(text) {
         showView(el.dataset.nav);
       })
     );
+
+    const obStart = $("#ob-start");
+    if (obStart) obStart.addEventListener("click", () => showGuide(0));
+    const obLater = $("#ob-later");
+    if (obLater) obLater.addEventListener("click", () => { markGuideSeen(); showView("home"); });
+    $$("#app [data-help=guide]").forEach((el) => el.addEventListener("click", () => showGuide(0)));
 
     $$("#app [data-act=detail]").forEach((el) => {
       const open = () => {

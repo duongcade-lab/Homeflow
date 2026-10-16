@@ -464,6 +464,151 @@ button:focus-visible, .chip:focus-visible, .owner:focus-visible, .mission:focus-
 .quick.lav { background: var(--lavender); color: var(--primary-deep); }
 .quick.gold { background: #F7ECD4; color: #8A6A2F; }
 
+/* ---------- Onboarding + Help ---------- */
+
+.onboard-card {
+  display: flex; align-items: center; gap: 11px;
+  background: var(--lavender);
+  border-radius: var(--r-lg);
+  padding: 13px 14px;
+  margin-top: 12px;
+  box-shadow: var(--shadow-soft);
+}
+.onboard-card .ob-emoji { font-size: 24px; flex-shrink: 0; }
+.onboard-card .ob-body { flex: 1; min-width: 0; }
+.onboard-card .ob-body strong { display: block; font-size: 13.5px; color: var(--primary-deep); }
+.onboard-card .ob-body span { display: block; font-size: 11.5px; color: var(--ink-soft); font-weight: 700; margin-top: 2px; line-height: 1.4; }
+.onboard-card .ob-actions { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
+.onboard-card .ob-start {
+  background: var(--primary); color: var(--white);
+  font-weight: 800; font-size: 12px;
+  padding: 8px 14px; border-radius: var(--r-pill);
+}
+.onboard-card .ob-later {
+  background: transparent; color: var(--ink-soft);
+  font-weight: 700; font-size: 11.5px;
+  padding: 4px 6px; border-radius: 8px;
+}
+.help-row {
+  display: flex; gap: 8px;
+  margin-top: 12px;
+}
+.help-btn {
+  flex: 1;
+  background: var(--cream-card);
+  color: var(--ink-soft);
+  font-weight: 800; font-size: 12px;
+  padding: 10px 12px;
+  border-radius: var(--r-pill);
+  box-shadow: var(--shadow-soft);
+  transition: all .18s var(--ease);
+}
+.help-btn:hover { background: var(--lavender); color: var(--primary-deep); }
+
+/* ---------- Guide overlay ---------- */
+
+.guide-overlay {
+  position: fixed; inset: 0; z-index: 110;
+  background: linear-gradient(160deg, #7442A8 0%, #5E2F92 70%, #4A2576 100%);
+  display: flex; align-items: center; justify-content: center;
+  padding: 22px;
+}
+.guide-card {
+  position: relative;
+  background: var(--cream-bg);
+  border-radius: 26px;
+  width: 100%; max-width: 380px;
+  padding: 38px 26px 22px;
+  text-align: center;
+  box-shadow: 0 24px 60px rgba(46, 27, 74, .45);
+}
+.guide-close {
+  position: absolute; top: 14px; right: 14px;
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: var(--lavender);
+  color: var(--primary-deep);
+  font-size: 14px; font-weight: 800;
+  display: grid; place-items: center;
+}
+.guide-progress {
+  height: 6px; border-radius: 999px;
+  background: var(--lavender);
+  overflow: hidden;
+  margin-bottom: 22px;
+}
+.guide-progress i {
+  display: block; height: 100%;
+  background: var(--primary);
+  border-radius: 999px;
+  transition: width .3s var(--ease);
+}
+.guide-icon {
+  width: 72px; height: 72px;
+  margin: 0 auto;
+  background: var(--white);
+  border-radius: 24px;
+  display: grid; place-items: center;
+  font-size: 36px;
+  box-shadow: var(--shadow-soft);
+}
+.guide-eyebrow {
+  margin-top: 16px;
+  font-size: 11px; font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+.guide-title {
+  margin-top: 6px;
+  font-family: var(--font-display);
+  font-size: 21px; font-weight: 800;
+  color: var(--ink);
+}
+.guide-text {
+  margin-top: 10px;
+  font-size: 14px; font-weight: 600;
+  color: var(--ink-soft);
+  line-height: 1.65;
+}
+.guide-dots { display: flex; justify-content: center; gap: 6px; margin-top: 16px; }
+.guide-dots .gd {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--lavender);
+  transition: all .2s var(--ease);
+}
+.guide-dots .gd.on { background: var(--primary); width: 22px; border-radius: 999px; }
+.guide-actions {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  margin-top: 20px;
+}
+.guide-actions .gb-cta { flex: 1; }
+.guide-actions .gb-back {
+  background: var(--lavender);
+  color: var(--primary-deep);
+  font-weight: 800; font-size: 12.5px;
+  padding: 12px 14px;
+  border-radius: var(--r-pill);
+}
+.guide-skip {
+  margin-top: 16px;
+  background: transparent;
+  color: var(--ink-soft);
+  font-weight: 700; font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.guide-next-link {
+  margin-top: 12px;
+  background: transparent;
+  color: var(--primary);
+  font-weight: 800; font-size: 12.5px;
+  padding: 8px 14px;
+  border-radius: var(--r-pill);
+}
+
 /* ---------- Dump (Tell HomeFlow) ---------- */
 
 .dump-wrap { padding-top: 8px; }
