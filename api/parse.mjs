@@ -1,13 +1,12 @@
 /* HomeFlow — serverless LLM parser for "Nói với HomeFlow".
-   Runs server-side on Vercel. Calls Vercel AI Gateway via the AI SDK.
-   The AI_GATEWAY_API_KEY env var never leaves the server. */
+   Runs server-side on Vercel. Calls Google Gemini via the AI SDK.
+   The GEMINI_API_KEY env var never leaves the server. */
 
 import { generateObject } from "ai";
-import { createOpenAI } from "@ai-sdk/openai";
+import { google } from "@ai-sdk/google";
 import { z } from "zod";
 
-const MODEL = process.env.HOME_FLOW_MODEL || "openai/gpt-4o-mini";
-const BASE_URL = process.env.AI_GATEWAY_BASE_URL || "https://ai-gateway.vercel.sh/v1";
+const MODEL = process.env.HOME_FLOW_MODEL || "gemini-2.5-flash";
 const TODAY = 4; // thứ 6 — matches the demo calendar
 
 const DAY_MAP = {
@@ -82,12 +81,9 @@ Nguyên tắc của HomeFlow:
 Trả về đúng JSON schema.`;
 
   try {
-    const gateway = createOpenAI({
-      apiKey: process.env.AI_GATEWAY_API_KEY,
-      baseURL: BASE_URL,
-    });
+    const provider = google(MODEL, { apiKey: process.env.GEMINI_API_KEY });
     const { object } = await generateObject({
-      model: gateway(MODEL),
+      model: provider,
       schema: ResultSchema,
       system,
       prompt: text,
@@ -116,10 +112,10 @@ Trả về đúng JSON schema.`;
     const status = err && typeof err.status === "number" ? err.status : "";
     const msg = sanitize(err instanceof Error ? err.message : String(err));
     console.error("[HomeFlow] LLM parse failed:", status, msg);
-    const keySet = !!process.env.AI_GATEWAY_API_KEY;
+    const keySet = !!process.env.GEMINI_API_KEY;
     return res.status(500).json({
       error: "AI Gateway temporarily unavailable",
-      detail: keySet ? `${status} ${msg}` : "AI_GATEWAY_API_KEY not set",
+      detail: keySet ? `${status} ${msg}` : "GEMINI_API_KEY not set",
     });
   }
 }

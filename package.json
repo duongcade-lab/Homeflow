@@ -8,7 +8,7 @@
     "check": "node --check js/app.js && node tests/smoke.js"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^3.0.129",
+    "@ai-sdk/google": "^3.0.134",
     "ai": "^6.0.308",
     "zod": "^3.25.76"
   }
