@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>HomeFlow — Share the load. Enjoy the moments.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="stage">
+
+  <aside class="brand" aria-hidden="true">
+    <div class="brand-mark">💜</div>
+    <h1 class="brand-word"><span class="bw-home">Home</span><span class="bw-flow">Flow</span></h1>
+    <p class="brand-tag">Share the load.<br>Enjoy the moments.</p>
+    <div class="brand-concept">
+      <div class="bc-chip"><span>🗣️</span><div><strong>Tell HomeFlow</strong><em>Nói là HomeFlow hiểu</em></div></div>
+      <div class="bc-chip"><span>🧠↔✅</span><div><strong>Ai nghĩ ≠ Ai làm</strong><em>Planning Owner ≠ Task Owner</em></div></div>
+      <div class="bc-chip"><span>⚖️</span><div><strong>Cân bằng gia đình</strong><em>Việc không tên được nhìn thấy</em></div></div>
+    </div>
+    <p class="brand-foot">Beauty Can Code · Live demo</p>
+  </aside>
+
+  <div class="phone">
+    <div class="phone-notch"></div>
+    <div class="screen">
+      <main id="app" aria-live="polite"></main>
+      <button class="fab" id="fab" aria-label="Tell HomeFlow">
+        <span class="fab-spark">✨</span><span class="fab-text">Tell HomeFlow</span>
+      </button>
+      <nav class="tabbar" id="tabbar" aria-label="Điều hướng chính">
+        <button class="tab" data-view="home"><span class="tab-ico">🏡</span><span class="tab-lab">Hôm nay</span></button>
+        <button class="tab" data-view="planner"><span class="tab-ico">📅</span><span class="tab-lab">Kế hoạch</span></button>
+        <button class="tab" data-view="balance"><span class="tab-ico">⚖️</span><span class="tab-lab">Cân bằng</span></button>
+        <button class="tab" data-view="brief"><span class="tab-ico">💌</span><span class="tab-lab">Bản tin</span></button>
+      </nav>
+    </div>
+  </div>
+
+</div>
+<div class="toast" id="toast" role="status"></div>
+<script src="js/app.js"></script>
+</body>
+</html>
