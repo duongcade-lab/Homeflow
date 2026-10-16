@@ -125,11 +125,11 @@ const DAY_SHORT = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
     ];
 
     state.missions = [
-      { id: "m1", title: "Tự chuẩn bị cặp", for: "bin", stars: 2, got: 1, emoji: "🎒", bg: "#E7DBF5", done: false },
-      { id: "m2", title: "Tưới cây", for: "su", stars: 1, got: 1, emoji: "🪴", bg: "#E3ECDF", done: false },
-      { id: "m3", title: "Thu dọn đồ chơi", for: "su", stars: 2, got: 1, emoji: "🧸", bg: "#F9E3E9", done: false },
-      { id: "m4", title: "Giúp chuẩn bị bàn ăn", for: "bin", stars: 2, got: 1, emoji: "🍽️", bg: "#F7ECD4", done: false },
-      { id: "m5", title: "Sắp xếp sách", for: "bin", stars: 3, got: 1, emoji: "📚", bg: "#E3ECDF", done: false },
+      { id: "m1", title: "Tự chuẩn bị cặp", for: "bin", stars: 2, got: 1, emoji: "🎒", bg: "#E7DBF5", done: false, step: 1, steps: ["Con biết ngày mai cần gì.", "Con tự chuẩn bị sách vở cần thiết.", "Cặp đã sẵn sàng!"] },
+      { id: "m2", title: "Tưới cây", for: "su", stars: 1, got: 1, emoji: "🪴", bg: "#E3ECDF", done: false, step: 1, steps: ["Con nhớ cây cần nước.", "Con lấy bình tưới nước.", "Cây đã được tưới xanh!"] },
+      { id: "m3", title: "Thu dọn đồ chơi", for: "su", stars: 2, got: 1, emoji: "🧸", bg: "#F9E3E9", done: false, step: 1, steps: ["Con nhớ chỗ để đồ chơi.", "Con gom đồ chơi về đúng chỗ.", "Phòng gọn gàng rồi!"] },
+      { id: "m4", title: "Giúp chuẩn bị bàn ăn", for: "bin", stars: 2, got: 1, emoji: "🍽️", bg: "#F7ECD4", done: false, step: 1, steps: ["Con nhớ bữa tối của cả nhà.", "Con xếp bát đũa cho mọi người.", "Bàn ăn đã sẵn sàng!"] },
+      { id: "m5", title: "Sắp xếp sách", for: "bin", stars: 3, got: 1, emoji: "📚", bg: "#E3ECDF", done: false, step: 1, steps: ["Con nhớ sách của mình ở đâu.", "Con xếp sách gọn gàng.", "Giá sách ngăn nắp!"] },
     ];
 
     state.brief = { done: [], pending: [], next: [] };
@@ -1167,17 +1167,26 @@ function timeHint(text) {
       <div class="section-head"><h3>Nhiệm vụ tuần này</h3></div>
       ${state.missions.map((ms) => {
         const kid = member(ms.for);
+        const STEP_LABELS = ["Nhớ", "Chuẩn bị", "Hoàn thành"];
         return `
           <article class="mission-card ${ms.done ? "done" : ""}" data-id="${ms.id}">
             <div class="mission-emoji" style="background:${ms.bg}">${ms.emoji}</div>
             <div class="mission-body">
               <div class="mission-title">${esc(ms.title)}</div>
               <div class="mission-for">Cho ${kid.name} ${kid.emoji}</div>
+              <div class="mission-steps">
+                ${STEP_LABELS.map((lab, i) => `
+                  <div class="mstep ${i < ms.step ? "done" : ""} ${i === ms.step ? "active" : ""}">
+                    <span class="ms-dot">${i < ms.step ? "✓" : i + 1}</span>
+                    <span class="ms-name">${lab}</span>
+                  </div>`).join("")}
+              </div>
+              <div class="mission-step-desc">${ms.done ? "Tuyệt vời! 🎉" : ms.steps[ms.step]}</div>
               <div class="stars">
                 ${Array.from({ length: ms.stars }, (_, i) => `<span class="st ${i < ms.got ? "" : "off"}">⭐</span>`).join("")}
               </div>
             </div>
-            <button class="mission-btn" data-act="mission">${ms.done ? "✓ Xong" : "Hoàn thành"}</button>
+            <button class="mission-btn" data-act="mission">${ms.done ? "✓ Xong" : ms.step >= 2 ? "Hoàn thành" : "Tiếp theo"}</button>
           </article>`;
       }).join("")}
     `;
@@ -1526,10 +1535,16 @@ function timeHint(text) {
         const card = el.closest(".mission-card");
         const ms = state.missions.find((x) => x.id === card.dataset.id);
         if (ms.done) return;
-        ms.done = true;
-        ms.got = ms.stars;
-        toast(`Chúc mừng ${member(ms.for).name}! +${ms.stars} ⭐`);
-        setTimeout(() => showView("missions"), 650);
+        ms.step += 1;
+        if (ms.step >= 3) {
+          ms.done = true;
+          ms.got = ms.stars;
+          toast(`Chúc mừng ${member(ms.for).name}! +${ms.stars} ⭐`);
+        } else {
+          ms.got = Math.min(ms.got + 1, ms.stars);
+          toast(`${ms.steps[ms.step - 1]} 💜`);
+        }
+        setTimeout(() => showView("missions"), 600);
       });
     });
 

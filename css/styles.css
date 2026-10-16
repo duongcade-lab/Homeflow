@@ -1381,6 +1381,38 @@ textarea.dump-input::placeholder { color: var(--ink-faint); }
 .mission-body { flex: 1; min-width: 0; }
 .mission-title { font-weight: 800; font-size: 14.5px; }
 .mission-for { font-size: 12px; color: var(--ink-soft); font-weight: 700; margin-top: 2px; }
+.mission-steps { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
+.mission-steps .mstep {
+  display: flex; align-items: center; gap: 4px;
+  background: var(--cream-deep);
+  border-radius: var(--r-pill);
+  padding: 4px 8px;
+  opacity: .55;
+  transition: all .2s var(--ease);
+}
+.mission-steps .mstep.active { background: var(--lavender); opacity: 1; }
+.mission-steps .mstep.done { background: var(--sage); opacity: 1; }
+.mission-steps .ms-dot {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--white);
+  color: var(--primary-deep);
+  font-size: 9px; font-weight: 800;
+  display: grid; place-items: center;
+}
+.mission-steps .mstep.done .ms-dot { color: #45673F; }
+.mission-steps .ms-name { font-size: 10px; font-weight: 800; color: var(--ink); }
+.mission-step-desc {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--primary-deep);
+  background: var(--lavender);
+  border-radius: 10px;
+  padding: 6px 10px;
+  margin-top: 8px;
+  line-height: 1.4;
+}
+.mission-card.done .mission-step-desc { background: var(--sage); color: #45673F; }
 .stars { display: inline-flex; gap: 2px; margin-top: 6px; font-size: 15px; }
 .stars .st.off { filter: grayscale(1); opacity: .35; }
 .mission-btn {
