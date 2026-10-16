@@ -821,10 +821,10 @@ function timeHint(text) {
 
   const AI_STEPS = [
     "Hiểu việc cả nhà nói",
-    "Tạo task & sự kiện",
-    "Đặt deadline cho từng việc",
+    "Sắp xếp việc thành kế hoạch",
+    "Biết việc nào cần làm khi nào",
     "Gợi ý ai nghĩ, ai làm",
-    "Lên lịch nhắc việc",
+    "Nhắc cả nhà đúng lúc",
   ];
 
   VIEWS.ai = () => `
@@ -1510,8 +1510,8 @@ function timeHint(text) {
       </div>
 
       <div class="brief-tagline">
-        <div class="bt-line">Less to remember.</div>
-        <div class="bt-line2">More time to live.</div>
+        <div class="bt-line">Ít việc phải nhớ hơn.</div>
+        <div class="bt-line2">Nhiều thời gian bên nhau hơn.</div>
         <div class="bt-heart">💜</div>
       </div>
 
@@ -1573,7 +1573,7 @@ function timeHint(text) {
         it.done = !it.done;
         el.classList.toggle("on", it.done);
         card.classList.toggle("done", it.done);
-        toast(it.done ? `Đã xong: ${it.title} 🎉` : "Đã đánh dấu chưa xong");
+        toast(it.done ? `Đã xong: ${it.title} 🎉` : "Đã bỏ đánh dấu — việc vẫn còn đó 💜");
         refreshLoadBars();
       });
     });
@@ -1585,7 +1585,7 @@ function timeHint(text) {
         it.done = !it.done;
         el.classList.toggle("on", it.done);
         item.classList.toggle("done", it.done);
-        toast(it.done ? `Đã xong: ${it.title} 🎉` : "Đã đánh dấu chưa xong");
+        toast(it.done ? `Đã xong: ${it.title} 🎉` : "Đã bỏ đánh dấu — việc vẫn còn đó 💜");
         refreshLoadBars();
       });
     });
@@ -1760,7 +1760,7 @@ function timeHint(text) {
           .catch(() => {
             state.parseResult = parseDump(raw);
             state.aiSummary = "";
-            toast("AI chưa phản hồi — HomeFlow dùng trí tuệ offline 💜");
+            toast("HomeFlow tự hiểu giúp cả nhà 💜");
           });
         Promise.all([animDone, llm]).then(() => {
           if (state.view === "ai") showView("confirm");
@@ -1775,7 +1775,7 @@ function timeHint(text) {
       );
       $("#dump-submit").addEventListener("click", () => {
         const raw = ta.value.trim();
-        if (!raw) { toast("Hãy nói một câu gì đó cho cả nhà nhé 💬"); return; }
+        if (!raw) { toast("Có gì đang ở trong đầu bạn? Cứ nói ra nhé 💬"); return; }
         submitDump(raw);
       });
 

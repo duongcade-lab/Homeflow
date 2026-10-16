@@ -73,7 +73,7 @@ const appJs = fs.readFileSync(path.join(ROOT, "js/app.js"), "utf8");
 ok(appJs.includes("Lớp tiếng Anh của"), "parser produces the demo class item");
 ok(appJs.includes("Mua quà sinh nhật bà"), "parser produces the demo gift item");
 ok(appJs.includes("Thêm vào HomeFlow"), "confirm CTA present");
-ok(appJs.includes("Less to remember"), "brief tagline present");
+ok(appJs.includes("Ít việc phải nhớ hơn"), "brief tagline present");
 ok(appJs.includes("SpeechRecognition"), "voice input wired");
 
 console.log("\n" + (failures.length ? `FAILED: ${failures.length} issue(s)` : "ALL CHECKS PASSED"));
