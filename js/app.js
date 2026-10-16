@@ -94,6 +94,8 @@ const DAY_SHORT = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
     lastDump: "",
     aiSummary: "",
     plannerDay: TODAY_IDX,
+    plannerMode: "day",
+    monthOffset: 0,
     taskFilter: "all",
     profileKid: null,
     detailItem: null,
@@ -815,15 +817,27 @@ function timeHint(text) {
 
   VIEWS.planner = () => {
     const dots = DAYS.map((_, d) => state.items.filter((it) => it.day === d && !it.done).length);
-    const dayItems = state.items.filter((it) => it.day === state.plannerDay);
-    const events = dayItems.filter((it) => it.kind === "event").sort((a, b) => (a.time || "99").localeCompare(b.time || "99"));
-    const tasks = dayItems.filter((it) => it.kind === "task");
+    const mode = state.plannerMode;
 
     return `
       <div class="eyebrow">Family Planner</div>
       <h2 class="h-title">Kế hoạch của cả nhà</h2>
       <p class="h-sub">Một lịch chung — ai nghĩ, ai làm, ai nhắc đều thấy rõ.</p>
 
+      <div class="mode-toggle" role="tablist" aria-label="Chế độ xem lịch">
+        ${[["day", "Ngày"], ["week", "Tuần"], ["month", "Tháng"]].map(([k, lab]) =>
+          `<button class="mt-btn ${mode === k ? "on" : ""}" data-mode="${k}" role="tab" aria-selected="${mode === k}">${lab}</button>`).join("")}
+      </div>
+
+      ${mode === "day" ? dayPlanner(dots) : mode === "week" ? weekPlanner(dots) : monthPlanner(dots)}
+    `;
+  };
+
+  function dayPlanner(dots) {
+    const dayItems = state.items.filter((it) => it.day === state.plannerDay);
+    const events = dayItems.filter((it) => it.kind === "event").sort((a, b) => (a.time || "99").localeCompare(b.time || "99"));
+    const tasks = dayItems.filter((it) => it.kind === "task");
+    return `
       <div class="week-strip">
         ${DAYS.map((d, i) => `
           <button class="wday ${i === TODAY_IDX ? "today" : ""} ${i === state.plannerDay ? "selected" : ""}" data-day="${i}">
@@ -846,7 +860,69 @@ function timeHint(text) {
         ${!dayItems.length ? `<div class="empty-note"><span class="en-emoji">🌸</span>Ngày này còn trống, thật thoải mái!</div>` : ""}
       </div>
     `;
-  };
+  }
+
+  function weekPlanner(dots) {
+    const itemsOf = (d) => state.items.filter((it) => it.day === d);
+    return `
+      <div class="week-grid">
+        ${DAYS.map((d, i) => `
+          <button class="wg-col ${i === state.plannerDay ? "selected" : ""} ${i === TODAY_IDX ? "today" : ""}" data-day="${i}">
+            <div class="wg-head">
+              <span class="wg-name">${DAY_SHORT[i]}</span>
+              <span class="wg-num">${i === TODAY_IDX ? "Hôm nay" : (TODAY_DATE + i - TODAY_IDX)}</span>
+            </div>
+            <div class="wg-body">
+              ${itemsOf(i).map((it) => `<div class="wg-item"><span class="wg-emoji">${it.emoji}</span><span class="wg-title">${esc(it.title)}</span>${it.time ? `<span class="wg-time">${it.time}</span>` : ""}</div>`).join("")}
+              ${!itemsOf(i).length ? `<div class="wg-empty">—</div>` : ""}
+            </div>
+          </button>`).join("")}
+      </div>
+      <div class="date-nav">
+        <button class="dn-btn" data-day="prev" aria-label="Ngày trước">←</button>
+        <button class="dn-today" data-day="today">Hôm nay</button>
+        <button class="dn-btn" data-day="next" aria-label="Ngày tiếp theo">→</button>
+      </div>
+      <p class="mg-hint">Bấm vào một ngày để xem chi tiết</p>
+    `;
+  }
+
+  function monthPlanner() {
+    const base = new Date(Date.UTC(TODAY_YEAR, TODAY_MONTH - 1 + state.monthOffset, 1));
+    const year = base.getUTCFullYear();
+    const month = base.getUTCMonth();
+    const daysInMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+    const lead = (base.getUTCDay() + 6) % 7;
+    const cells = [];
+    for (let i = 0; i < lead; i++) cells.push(null);
+    for (let d = 1; d <= daysInMonth; d++) {
+      const appDay = (new Date(Date.UTC(year, month, d)).getUTCDay() + 6) % 7;
+      cells.push({ date: d, appDay });
+    }
+    const isCurrentMonth = state.monthOffset === 0;
+    const dots = DAYS.map((_, dd) => state.items.filter((it) => it.day === dd && !it.done).length);
+    return `
+      <div class="month-head">
+        <button class="mn-btn" data-mnav="prev" aria-label="Tháng trước">←</button>
+        <span class="mn-label">Tháng ${month + 1}/${year}</span>
+        <button class="mn-btn" data-mnav="next" aria-label="Tháng sau">→</button>
+      </div>
+      <div class="month-grid">
+        ${DAY_SHORT.map((d) => `<div class="mg-dow">${d}</div>`).join("")}
+        ${cells.map((c) => c ? `
+          <button class="mg-cell ${c.date === TODAY_DATE && isCurrentMonth ? "today" : ""}" data-mday="${c.appDay}">
+            <span class="mg-date">${c.date}</span>
+            ${isCurrentMonth && dots[c.appDay] ? `<span class="mg-dots">${"●".repeat(Math.min(dots[c.appDay], 3))}</span>` : ""}
+          </button>` : `<div class="mg-cell blank"></div>`).join("")}
+      </div>
+      <div class="date-nav">
+        <button class="dn-btn" data-day="prev" aria-label="Ngày trước">←</button>
+        <button class="dn-today" data-day="today">Hôm nay</button>
+        <button class="dn-btn" data-day="next" aria-label="Ngày tiếp theo">→</button>
+      </div>
+      <p class="mg-hint">Bấm vào một ngày để xem chi tiết</p>
+    `;
+  }
 
   /* ---------- 5. Shared Tasks ---------- */
 
@@ -1340,6 +1416,36 @@ function timeHint(text) {
         if (d === "prev") state.plannerDay = (state.plannerDay + 6) % 7;
         else if (d === "next") state.plannerDay = (state.plannerDay + 1) % 7;
         else state.plannerDay = TODAY_IDX;
+        showView("planner");
+      })
+    );
+
+    $$(".mt-btn[data-mode]").forEach((el) =>
+      el.addEventListener("click", () => {
+        state.plannerMode = el.dataset.mode;
+        showView("planner");
+      })
+    );
+
+    $$(".wg-col[data-day]").forEach((el) =>
+      el.addEventListener("click", () => {
+        state.plannerDay = +el.dataset.day;
+        state.plannerMode = "day";
+        showView("planner");
+      })
+    );
+
+    $$(".mg-cell[data-mday]").forEach((el) =>
+      el.addEventListener("click", () => {
+        state.plannerDay = +el.dataset.mday;
+        state.plannerMode = "day";
+        showView("planner");
+      })
+    );
+
+    $$(".mn-btn[data-mnav]").forEach((el) =>
+      el.addEventListener("click", () => {
+        state.monthOffset += el.dataset.mnav === "prev" ? -1 : 1;
         showView("planner");
       })
     );

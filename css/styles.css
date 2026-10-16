@@ -858,6 +858,125 @@ textarea.dump-input::placeholder { color: var(--ink-faint); }
 }
 .date-nav .dn-today:hover { background: var(--lavender); }
 
+.mode-toggle {
+  display: flex;
+  gap: 6px;
+  margin-top: 16px;
+  background: var(--cream-card);
+  border-radius: var(--r-pill);
+  padding: 4px;
+  box-shadow: var(--shadow-soft);
+}
+.mode-toggle .mt-btn {
+  flex: 1;
+  font-family: inherit;
+  font-size: 12.5px; font-weight: 800;
+  color: var(--ink-soft);
+  background: transparent;
+  border: none;
+  border-radius: var(--r-pill);
+  padding: 8px 0;
+  cursor: pointer;
+  transition: all .2s var(--ease);
+}
+.mode-toggle .mt-btn.on {
+  background: var(--primary);
+  color: var(--white);
+  box-shadow: var(--shadow-pop);
+}
+
+.week-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  margin-top: 16px;
+}
+.week-grid .wg-col {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  border: none;
+  border-radius: 16px;
+  padding: 8px 4px;
+  background: var(--cream-card);
+  box-shadow: var(--shadow-soft);
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: all .2s var(--ease);
+  min-height: 120px;
+}
+.week-grid .wg-col.today { background: var(--lavender); }
+.week-grid .wg-col.selected { outline: 2.5px solid var(--lavender-deep); }
+.week-grid .wg-head { display: flex; flex-direction: column; gap: 1px; }
+.week-grid .wg-name { font-size: 10px; font-weight: 800; color: var(--ink-soft); text-transform: uppercase; }
+.week-grid .wg-num { font-family: var(--font-display); font-weight: 700; font-size: 14px; }
+.week-grid .wg-body { display: flex; flex-direction: column; gap: 4px; }
+.week-grid .wg-item {
+  display: flex; align-items: center; gap: 3px;
+  font-size: 9.5px; font-weight: 700; line-height: 1.25;
+  background: var(--white);
+  border-radius: 8px;
+  padding: 3px 4px;
+  box-shadow: var(--shadow-soft);
+}
+.week-grid .wg-time { color: var(--primary-deep); font-weight: 800; margin-left: auto; }
+.week-grid .wg-empty { color: var(--ink-faint); font-size: 11px; text-align: center; padding-top: 8px; }
+
+.month-head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 16px;
+}
+.month-head .mn-btn {
+  font-family: inherit;
+  font-size: 15px; font-weight: 800;
+  color: var(--primary-deep);
+  background: var(--lavender);
+  border: none;
+  border-radius: var(--r-pill);
+  width: 40px; height: 40px;
+  cursor: pointer;
+  box-shadow: var(--shadow-soft);
+  transition: all .2s var(--ease);
+}
+.month-head .mn-btn:hover { background: var(--lavender-deep); color: var(--white); }
+.month-head .mn-label { font-family: var(--font-display); font-weight: 700; font-size: 15px; }
+
+.month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+  margin-top: 14px;
+}
+.month-grid .mg-dow { font-size: 10px; font-weight: 800; color: var(--ink-faint); text-align: center; text-transform: uppercase; padding: 4px 0; }
+.month-grid .mg-cell {
+  position: relative;
+  aspect-ratio: 1;
+  border: none;
+  border-radius: 12px;
+  background: var(--cream-card);
+  box-shadow: var(--shadow-soft);
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  transition: all .2s var(--ease);
+}
+.month-grid .mg-cell:hover { background: var(--lavender); }
+.month-grid .mg-cell.today { background: var(--primary); }
+.month-grid .mg-cell.today .mg-date { color: var(--white); }
+.month-grid .mg-cell.blank { background: transparent; box-shadow: none; cursor: default; }
+.month-grid .mg-date { font-family: var(--font-display); font-weight: 700; font-size: 13px; }
+.month-grid .mg-dots { font-size: 7px; color: var(--lavender-deep); letter-spacing: 1px; }
+.month-grid .mg-cell.today .mg-dots { color: var(--white); }
+.mg-hint { text-align: center; font-size: 11px; color: var(--ink-faint); font-weight: 700; margin-top: 12px; }
+
 .day-group { margin-top: 20px; }
 .day-group .dg-head {
   display: flex; align-items: center; gap: 8px;
