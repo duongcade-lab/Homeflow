@@ -1096,6 +1096,14 @@ textarea.dump-input::placeholder { color: var(--ink-faint); }
 .member-card .mc-pct { font-family: var(--font-display); font-weight: 700; font-size: 20px; }
 .member-card .mc-bar { height: 6px; border-radius: var(--r-pill); background: var(--cream-deep); margin-top: 6px; overflow: hidden; }
 .member-card .mc-bar i { display: block; height: 100%; border-radius: var(--r-pill); transition: width .9s var(--ease); }
+.member-card .mc-load { margin-top: 6px; display: flex; flex-direction: column; gap: 4px; }
+.member-card .ml-row { display: flex; align-items: center; gap: 7px; }
+.member-card .ml-label { font-size: 10.5px; font-weight: 800; color: var(--ink-soft); white-space: nowrap; width: 74px; }
+.member-card .ml-track { flex: 1; height: 6px; border-radius: var(--r-pill); background: var(--cream-deep); overflow: hidden; }
+.member-card .ml-track i { display: block; height: 100%; border-radius: var(--r-pill); transition: width .9s var(--ease); }
+.member-card .ml-val { font-size: 11px; font-weight: 800; color: var(--ink); width: 14px; text-align: right; }
+.member-card .mc-load.sm .ml-label { width: 18px; }
+.member-card .mc-load.sm .ml-val { font-size: 10px; }
 
 .banner {
   display: flex; align-items: center; gap: 12px;

@@ -1006,8 +1006,10 @@ function timeHint(text) {
             ${avatarHtml(m)}
             <div class="mc-info">
               <div class="mc-name">${m.name} <span class="mc-role">(${m.role})</span></div>
-              <div class="mc-break">🧠 Nghĩ và lo ${planningCnt} việc · ✅ Làm ${doCnt} việc</div>
-              <div class="mc-bar"><i style="width:${Math.min(100, pcts[m.id] * 1.6)}%;background:${m.color}"></i></div>
+              <div class="mc-load">
+                <div class="ml-row"><span class="ml-label">🧠 Nghĩ và lo</span><span class="ml-track"><i style="width:${Math.min(100, planningCnt * 12)}%;background:${m.color}"></i></span><span class="ml-val">${planningCnt}</span></div>
+                <div class="ml-row"><span class="ml-label">✅ Làm</span><span class="ml-track"><i style="width:${Math.min(100, doCnt * 12)}%;background:${m.dark}"></i></span><span class="ml-val">${doCnt}</span></div>
+              </div>
             </div>
             <div class="mc-pct" style="color:${m.dark}">${pcts[m.id]}%</div>
           </div>`;
@@ -1022,8 +1024,10 @@ function timeHint(text) {
               ${avatarHtml(m, "sm")}
               <div class="mc-info">
                 <div class="mc-name">${m.name}</div>
-                <div class="mc-break">🧠 ${planningCnt} · ✅ ${doCnt}</div>
-                <div class="mc-bar"><i style="width:${Math.min(100, pcts[m.id] * 1.6)}%;background:${m.color}"></i></div>
+                <div class="mc-load sm">
+                  <div class="ml-row"><span class="ml-label">🧠</span><span class="ml-track"><i style="width:${Math.min(100, planningCnt * 12)}%;background:${m.color}"></i></span><span class="ml-val">${planningCnt}</span></div>
+                  <div class="ml-row"><span class="ml-label">✅</span><span class="ml-track"><i style="width:${Math.min(100, doCnt * 12)}%;background:${m.dark}"></i></span><span class="ml-val">${doCnt}</span></div>
+                </div>
               </div>
               <div class="mc-pct" style="color:${m.dark}">${pcts[m.id]}%</div>
             </div>`;
@@ -1040,25 +1044,35 @@ function timeHint(text) {
   /* ---------- 7. Smart Rebalance ---------- */
 
   VIEWS.rebalance = () => {
-    const { pcts } = loadTotals();
+    const { totals, pcts, sum } = loadTotals();
     const avg = avgPct(pcts);
     const targets = state.items.filter((it) => ["i2", "i3", "i13"].includes(it.id)); // Đóng tiền điện + Mua quà + Học phí
     const from = member("me");
     const to = member("bo");
+    const moved = targets.filter((t) => t.doers.includes("me")).length;
+    const meAfter = Math.round(((totals.me - moved) / sum) * 100);
+    const boAfter = Math.round(((totals.bo + moved) / sum) * 100);
 
     if (state.rebalanced) {
       const { pcts: np } = loadTotals();
       const beforePct = state.preMePct != null ? state.preMePct : pcts.me;
+      const beforeBoPct = state.preBoPct != null ? state.preBoPct : pcts.bo;
       return `
         <div class="rb-success">
           <span class="rs-emoji">🤝</span>
           <strong>Đã chia sẻ việc cho cả nhà!</strong>
           <p>${to.name} nhận <b>${targets.map((t) => `“${t.title}”`).join(" và ")}</b> — ${from.name} vẫn nhớ &amp; lo, nhưng không còn một mình gánh nữa.</p>
           <div class="before-after" style="margin-top:20px">
-            <div class="ba-col"><div class="ba-label">Trước</div><div class="ba-name" style="color:${from.color}">${from.name}</div>
-              <div class="ba-bar"><i style="width:${beforePct}%;background:${from.color}"></i></div><div style="font-size:11px;color:var(--ink-soft);font-weight:800;margin-top:4px">${beforePct}%</div></div>
-            <div class="ba-col"><div class="ba-label">Sau</div><div class="ba-name" style="color:${from.color}">${from.name}</div>
-              <div class="ba-bar"><i style="width:${np.me}%;background:${from.color}"></i></div><div style="font-size:11px;color:var(--ink-soft);font-weight:800;margin-top:4px">${np.me}%</div></div>
+            <div class="ba-col"><div class="ba-label">Trước</div>
+              <div class="ba-name" style="color:${from.color}">${from.name} ${beforePct}%</div>
+              <div class="ba-bar"><i style="width:${beforePct * 1.6}%;background:${from.color}"></i></div>
+              <div class="ba-name" style="color:${to.color}">${to.name} ${beforeBoPct}%</div>
+              <div class="ba-bar"><i style="width:${beforeBoPct * 1.6}%;background:${to.color}"></i></div></div>
+            <div class="ba-col"><div class="ba-label">Sau</div>
+              <div class="ba-name" style="color:${from.color}">${from.name} ${np.me}%</div>
+              <div class="ba-bar"><i style="width:${np.me * 1.6}%;background:${from.color}"></i></div>
+              <div class="ba-name" style="color:${to.color}">${to.name} ${np.bo}%</div>
+              <div class="ba-bar"><i style="width:${np.bo * 1.6}%;background:${to.color}"></i></div></div>
           </div>
           <button class="btn-primary" data-nav="balance" style="width:100%;margin-top:22px">Xem cân bằng mới ⚖️</button>
         </div>`;
@@ -1096,8 +1110,10 @@ function timeHint(text) {
             <div class="ba-name" style="color:${from.color}">${from.name} ${pcts.me}%</div>
             <div class="ba-bar"><i style="width:${pcts.me * 1.6}%;background:${from.color}"></i></div></div>
           <div class="ba-col"><div class="ba-label">Sau khi chia sẻ</div>
-            <div class="ba-name" style="color:${to.color}">${to.name} nhận thêm ${targets.length} việc</div>
-            <div class="ba-bar"><i style="width:${pcts.bo * 1.6}%;background:${to.color}"></i></div></div>
+            <div class="ba-name" style="color:${from.color}">${from.name} ${meAfter}%</div>
+            <div class="ba-bar"><i style="width:${meAfter * 1.6}%;background:${from.color}"></i></div>
+            <div class="ba-name" style="color:${to.color}">${to.name} ${boAfter}%</div>
+            <div class="ba-bar"><i style="width:${boAfter * 1.6}%;background:${to.color}"></i></div></div>
         </div>
       </div>
 
@@ -1715,6 +1731,7 @@ function timeHint(text) {
       if (btn) {
         btn.addEventListener("click", () => {
           state.preMePct = loadTotals().pcts.me;
+          state.preBoPct = loadTotals().pcts.bo;
           state.items.filter((it) => ["i2", "i3", "i13"].includes(it.id)).forEach((it) => { it.doers = ["bo"]; });
           state.rebalanced = true;
           showView("rebalance");
