@@ -288,6 +288,38 @@ const DAY_SHORT = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
     if (back) back.addEventListener("click", () => { ov.remove(); showGuide(step - 1); });
   }
 
+  function openVideo() {
+    let ov = $("#video-overlay");
+    if (!ov) {
+      ov = document.createElement("div");
+      ov.className = "video-overlay";
+      ov.id = "video-overlay";
+      ov.innerHTML = `
+        <div class="video-stage">
+          <button class="video-close" id="video-close" aria-label="Đóng video">✕</button>
+          <video id="demo-video" src="videos/demo.mp4" controls playsinline preload="metadata"></video>
+          <div class="video-endpanel" id="video-endpanel" hidden>
+            <div class="vp-title">Bạn muốn thử ngay?</div>
+            <button class="btn-primary vp-try" id="vp-try">✨ Nói với HomeFlow</button>
+            <button class="vp-replay" id="vp-replay">↻ Xem lại video</button>
+          </div>
+        </div>`;
+      document.body.appendChild(ov);
+      const vid = $("#demo-video");
+      const ep = $("#video-endpanel");
+      const close = () => { vid.pause(); ov.classList.remove("open"); };
+      $("#video-close").addEventListener("click", close);
+      vid.addEventListener("ended", () => { ep.hidden = false; });
+      $("#vp-try").addEventListener("click", () => { close(); showView("dump"); });
+      $("#vp-replay").addEventListener("click", () => { ep.hidden = true; vid.currentTime = 0; vid.play().catch(() => {}); });
+    }
+    ov.classList.add("open");
+    const vid = $("#demo-video");
+    $("#video-endpanel").hidden = true;
+    vid.currentTime = 0;
+    vid.play().catch(() => {});
+  }
+
   /* ---------- Router ---------- */
 
   const VIEWS = {};
@@ -490,8 +522,12 @@ const DAY_SHORT = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
         </div>
       </div>` : ""}
 
-      <div class="help-row">
-        <button class="help-btn" data-help="guide">💜 Bắt đầu hướng dẫn</button>
+      <div class="help-area">
+        <div class="help-head">❓ Trợ giúp</div>
+        <button class="help-item" data-help="guide">🚀 Bắt đầu với HomeFlow</button>
+        <button class="help-item" data-help="video">▶ Xem Video Demo</button>
+        <button class="help-item" data-help="po">🧠 Planning Owner là gì?</button>
+        <button class="help-item" data-help="fb">⚖️ Family Balance hoạt động thế nào?</button>
       </div>
     `;
   };
@@ -1501,7 +1537,15 @@ function timeHint(text) {
     if (obStart) obStart.addEventListener("click", () => showGuide(0));
     const obLater = $("#ob-later");
     if (obLater) obLater.addEventListener("click", () => { markGuideSeen(); showView("home"); });
-    $$("#app [data-help=guide]").forEach((el) => el.addEventListener("click", () => showGuide(0)));
+    $$("#app [data-help]").forEach((el) =>
+      el.addEventListener("click", () => {
+        const h = el.dataset.help;
+        if (h === "video") openVideo();
+        else if (h === "po") showGuide(1);
+        else if (h === "fb") showGuide(3);
+        else showGuide(0);
+      })
+    );
 
     $$("#app [data-act=detail]").forEach((el) => {
       const open = () => {
