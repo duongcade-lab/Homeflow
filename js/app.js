@@ -132,22 +132,7 @@ const DAY_SHORT = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
       { id: "m5", title: "Sắp xếp sách", for: "bin", stars: 3, got: 1, emoji: "📚", bg: "#E3ECDF", done: false },
     ];
 
-    state.brief = {
-      done: [
-        { emoji: "🦷", text: "Đặt lịch khám răng cho Bin", who: "Mẹ" },
-        { emoji: "💰", text: "Nộp học phí tháng 10", who: "Mẹ" },
-        { emoji: "🥬", text: "Đi chợ cuối tuần", who: "Bố" },
-      ],
-      pending: [
-        { emoji: "🎁", text: "Mua quà sinh nhật bà", who: "Mẹ" },
-        { emoji: "💡", text: "Đóng tiền điện", who: "Mẹ" },
-      ],
-      next: [
-        { emoji: "🏫", text: "Thứ 2: Họp phụ huynh lớp Bin", who: "Mẹ nhớ" },
-        { emoji: "⛽", text: "Thứ 4: Đổ xăng xe máy", who: "Bố nhớ" },
-        { emoji: "🎂", text: "Cuối tuần: Sinh nhật bà", who: "Cả nhà" },
-      ],
-    };
+    state.brief = { done: [], pending: [], next: [] };
 
     state.kids = {
       bin: {
@@ -428,7 +413,7 @@ const DAY_SHORT = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
         <button class="quick blush" data-nav="brief">
           <span class="q-emoji">💌</span>
           <strong>Bản tin tuần</strong>
-          <span class="q-sub">${state.brief.done.length} việc đã xong · ${state.brief.next.length} điều cần nhớ</span>
+          <span class="q-sub">${state.items.filter((it) => it.done).length} việc đã xong · ${state.items.filter((it) => !it.done).length} việc còn lại</span>
         </button>
       </div>
     `;
@@ -1353,33 +1338,52 @@ function timeHint(text) {
   /* ---------- 9. Weekly Family Brief ---------- */
 
   VIEWS.brief = () => {
-    const { pcts } = loadTotals();
-    const b = state.brief;
+    const yesterdayIdx = (TODAY_IDX + 6) % 7;
+    const tomorrowIdx = (TODAY_IDX + 1) % 7;
+    const byDay = (d) => state.items.filter((it) => it.day === d);
+    const doneYesterday = byDay(yesterdayIdx).filter((it) => it.done);
+    const today = byDay(TODAY_IDX).filter((it) => !it.done);
+    const tomorrow = byDay(tomorrowIdx).filter((it) => !it.done);
+    const restOfWeek = state.items.filter((it) => it.day > tomorrowIdx && !it.done);
+    const doneCount = state.items.filter((it) => it.done).length;
+    const aheadCount = today.length + tomorrow.length + restOfWeek.length;
+
+    const itemRow = (it, checked = false) => `
+      <div class="brief-item ${checked ? "checked" : ""}">
+        <span class="bi-emoji">${it.emoji}</span>
+        <span class="bi-text">${esc(it.title)}${it.time ? ` <span class="bi-time">· ${it.time}</span>` : ""}</span>
+        <span class="bi-who">${ownersMini(it)}</span>
+      </div>`;
+
     return `
       <div class="eyebrow blush">Weekly Family Brief</div>
       <h2 class="h-title">Bản tin tuần của cả nhà 💌</h2>
-      <p class="h-sub">Tóm tắt tự động — việc đã xong, việc còn lại và điều cần nhớ tuần tới.</p>
+      <p class="h-sub">Một lá thư nhỏ — việc đã xong, việc hôm nay và những điều sắp tới.</p>
 
       <div class="brief-letter">
         <div class="brief-greet">Gửi cả nhà yêu thương 💜</div>
         <div class="brief-summary">
-          Tuần này cả nhà đã cùng nhau hoàn thành <b>${b.done.length} việc</b>, đang còn <b>${b.pending.length} việc</b> dang dở.
-          ${member("me").name} vẫn đang gánh <b>${pcts.me}%</b> — tuần tới hãy chia sẻ thêm nhé.
+          Tuần này cả nhà đã cùng nhau hoàn thành <b>${doneCount} việc</b>, còn <b>${aheadCount} việc</b> phía trước — cùng nhau san sẻ nhé.
         </div>
 
         <div class="brief-section">
-          <div class="bs-label done">✅ Hoàn thành</div>
-          ${b.done.map((d) => `<div class="brief-item checked"><span class="bi-emoji">${d.emoji}</span>${esc(d.text)}<span class="bi-who">${d.who}</span></div>`).join("")}
+          <div class="bs-label done">HÔM QUA · đã hoàn thành</div>
+          ${doneYesterday.length ? doneYesterday.map((it) => itemRow(it, true)).join("") : `<div class="brief-empty">🌿 Hôm qua nhẹ nhàng</div>`}
         </div>
 
         <div class="brief-section">
-          <div class="bs-label pending">⏳ Còn lại</div>
-          ${b.pending.map((d) => `<div class="brief-item"><span class="bi-emoji">${d.emoji}</span>${esc(d.text)}<span class="bi-who">${d.who}</span></div>`).join("")}
+          <div class="bs-label today">HÔM NAY · cần chú ý</div>
+          ${today.length ? today.map((it) => itemRow(it)).join("") : `<div class="brief-empty">🌿 Hôm nay thật thoải mái</div>`}
         </div>
 
         <div class="brief-section">
-          <div class="bs-label next">🔔 Tuần tới</div>
-          ${b.next.map((d) => `<div class="brief-item"><span class="bi-emoji">${d.emoji}</span>${esc(d.text)}<span class="bi-who">${d.who}</span></div>`).join("")}
+          <div class="bs-label pending">NGÀY MAI · chuẩn bị</div>
+          ${tomorrow.length ? tomorrow.map((it) => itemRow(it)).join("") : `<div class="brief-empty">🌿 Ngày mai chưa có gì</div>`}
+        </div>
+
+        <div class="brief-section">
+          <div class="bs-label next">TUẦN TỚI · đừng quên</div>
+          ${restOfWeek.length ? restOfWeek.map((it) => itemRow(it)).join("") : `<div class="brief-empty">🌿 Cuối tuần thảnh thơi</div>`}
         </div>
       </div>
 

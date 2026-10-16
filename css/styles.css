@@ -1695,6 +1695,16 @@ textarea.dump-input::placeholder { color: var(--ink-faint); }
 .bs-label.done { background: var(--sage); color: #45673F; }
 .bs-label.pending { background: var(--blush); color: #96445E; }
 .bs-label.next { background: var(--lavender); color: var(--primary-deep); }
+.bs-label.today { background: var(--primary); color: var(--white); }
+
+.brief-item .bi-text { flex: 1; min-width: 0; }
+.brief-item .bi-time { font-size: 10.5px; font-weight: 800; color: var(--primary-deep); }
+.brief-empty {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-faint);
+  padding: 6px 2px;
+}
 
 .brief-tagline {
   text-align: center;
