@@ -385,7 +385,7 @@ const DAY_SHORT = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
         </div>
       </section>
 
-      ${sectionHead("Hôm nay · thứ 6", "Xem tất cả", "tasks")}
+      ${sectionHead(`Hôm nay · ${DAYS[TODAY_IDX]}`, "Xem tất cả", "tasks")}
       ${todayAdult.length ? todayAdult.slice(0, 4).map((it) => taskCard(it)).join("") : ""}
       ${todayKids.length ? `
         <div class="card kids-today">
@@ -831,6 +831,12 @@ function timeHint(text) {
             <div class="wd-num">${i === TODAY_IDX ? "Hôm nay" : (TODAY_DATE + i - TODAY_IDX)}</div>
             <div class="wd-dots">${dots[i] ? `<i></i>${dots[i] > 1 ? "<i></i>" : ""}${dots[i] > 3 ? "<i></i>" : ""}` : ""}</div>
           </button>`).join("")}
+      </div>
+
+      <div class="date-nav">
+        <button class="dn-btn" data-day="prev" aria-label="Ngày trước">←</button>
+        <button class="dn-today" data-day="today">Hôm nay</button>
+        <button class="dn-btn" data-day="next" aria-label="Ngày tiếp theo">→</button>
       </div>
 
       <div class="day-group">
@@ -1324,6 +1330,16 @@ function timeHint(text) {
     $$(".wday[data-day]").forEach((el) =>
       el.addEventListener("click", () => {
         state.plannerDay = +el.dataset.day;
+        showView("planner");
+      })
+    );
+
+    $$(".dn-btn[data-day], .dn-today[data-day]").forEach((el) =>
+      el.addEventListener("click", () => {
+        const d = el.dataset.day;
+        if (d === "prev") state.plannerDay = (state.plannerDay + 6) % 7;
+        else if (d === "next") state.plannerDay = (state.plannerDay + 1) % 7;
+        else state.plannerDay = TODAY_IDX;
         showView("planner");
       })
     );

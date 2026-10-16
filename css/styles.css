@@ -824,6 +824,40 @@ textarea.dump-input::placeholder { color: var(--ink-faint); }
 .wday.today .wd-dots i { background: var(--white); }
 .wday.selected { outline: 2.5px solid var(--lavender-deep); }
 
+.date-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+.date-nav .dn-btn {
+  font-family: inherit;
+  font-size: 16px; font-weight: 800;
+  color: var(--primary-deep);
+  background: var(--lavender);
+  border: none;
+  border-radius: var(--r-pill);
+  width: 44px; height: 44px;
+  cursor: pointer;
+  box-shadow: var(--shadow-soft);
+  transition: all .2s var(--ease);
+}
+.date-nav .dn-btn:hover { background: var(--lavender-deep); color: var(--white); }
+.date-nav .dn-today {
+  font-family: inherit;
+  font-size: 12.5px; font-weight: 800;
+  color: var(--primary-deep);
+  background: var(--cream-card);
+  border: 2px solid var(--lavender-deep);
+  border-radius: var(--r-pill);
+  padding: 9px 18px;
+  cursor: pointer;
+  box-shadow: var(--shadow-soft);
+  transition: all .2s var(--ease);
+}
+.date-nav .dn-today:hover { background: var(--lavender); }
+
 .day-group { margin-top: 20px; }
 .day-group .dg-head {
   display: flex; align-items: center; gap: 8px;

@@ -79,7 +79,14 @@ Nguyên tắc của HomeFlow:
 - emoji: chọn emoji phù hợp với việc.
 - title: tiếng Việt tự nhiên, ngắn gọn, viết hoa chữ cái đầu, nêu rõ tên người/việc (ví dụ "Bo đi công viên", "Mua quà sinh nhật bà").
 - Luôn trả về ít nhất 1 việc. Nếu không hiểu câu nói, tạo 1 task chung "Việc cần làm".
+- CHỈ tạo đúng số việc được nói trong câu — KHÔNG suy diễn thêm việc không được nhắc đến (vd: chỉ nói "mua quà sinh nhật" thì KHÔNG tạo thêm sự kiện "Sinh nhật bà").
 - summary: tóm tắt 1 câu tự nhiên bằng tiếng Việt về những việc vừa tạo, ngắn gọn ấm áp (tối đa 200 ký tự).
+
+VÍ DỤ MẪU (bắt chước đúng định dạng này):
+Câu nói: "Thứ 7 Bin học tiếng Anh lúc 9h, bố đưa con đi. Chủ nhật sinh nhật bà nên thứ 6 nhớ mua quà."
+Kết quả đúng (chỉ 2 việc):
+{"items":[{"kind":"event","title":"Lớp tiếng Anh của Bin","day":"thứ 7","time":"09:00","cat":"school","emoji":"📚","planning":"me","doers":["bo"]},{"kind":"task","title":"Mua quà sinh nhật bà","day":"thứ 6","time":null,"cat":"event","emoji":"🎁","planning":"me","doers":["all"]}],"summary":"Đã xếp lịch lớp tiếng Anh của Bin sáng thứ 7 và nhớ mua quà sinh nhật bà trước thứ 6 nhé!"}
+
 Trả về đúng JSON schema.`;
 
   try {
