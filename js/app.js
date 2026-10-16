@@ -105,7 +105,7 @@ const DAY_SHORT = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
   function seed() {
     state.items = [
       { id: "i2", kind: "task", title: "Đóng tiền điện", day: 4, cat: "bill", emoji: "💡", planning: "me", doers: ["me"], done: false },
-      { id: "i3", kind: "task", title: "Mua quà sinh nhật bà", day: 4, cat: "event", emoji: "🛍️", planning: "me", doers: ["me"], done: false },
+      { id: "i3", kind: "task", title: "Mua quà sinh nhật bà", day: 4, cat: "event", emoji: "🎁", planning: "me", doers: ["me"], done: false },
       { id: "i10", kind: "task", title: "Mua thuốc cho bà", day: 4, cat: "bill", emoji: "💊", planning: "me", doers: ["bo"], done: false },
       { id: "i9", kind: "task", title: "Kiểm tra bài vở", day: 4, cat: "school", emoji: "📖", planning: "me", doers: ["bin"], done: false },
       { id: "i8", kind: "task", title: "Mua sách vở", day: 4, cat: "school", emoji: "🎒", planning: "me", doers: ["su"], done: false },
@@ -136,7 +136,7 @@ const DAY_SHORT = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
         { emoji: "🥬", text: "Đi chợ cuối tuần", who: "Bố" },
       ],
       pending: [
-        { emoji: "🛍️", text: "Mua quà sinh nhật bà", who: "Mẹ" },
+        { emoji: "🎁", text: "Mua quà sinh nhật bà", who: "Mẹ" },
         { emoji: "💡", text: "Đóng tiền điện", who: "Mẹ" },
       ],
       next: [
@@ -616,7 +616,7 @@ function timeHint(text) {
         let title, emoji;
         if (clause.includes("tiếng anh")) {
           title = `Lớp tiếng Anh của ${who}`;
-          emoji = "🏫";
+          emoji = "📚";
         } else {
           const hm = clause.match(/đi học (?:(môn )?([a-zà-ỹ]+))/);
           if (hm) {
@@ -638,7 +638,7 @@ function timeHint(text) {
         const giftDay = clause.includes("mua quà") ? dayFor(clause, "mua quà") : Math.max(dayFor(clause, "sinh nhật") - 1, 0);
         push({
           kind: "task", title: "Mua quà sinh nhật bà", day: giftDay,
-          cat: "event", emoji: "🛍️", planning: plannerOf(clause), doers: [doer],
+          cat: "event", emoji: "🎁", planning: plannerOf(clause), doers: [doer],
         });
       }
 
