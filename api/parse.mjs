@@ -3,7 +3,7 @@
    The GEMINI_API_KEY env var never leaves the server. */
 
 import { generateObject } from "ai";
-import { google } from "@ai-sdk/google";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { z } from "zod";
 
 const MODEL = process.env.HOME_FLOW_MODEL || "gemini-2.5-flash";
@@ -81,9 +81,9 @@ Nguyên tắc của HomeFlow:
 Trả về đúng JSON schema.`;
 
   try {
-    const provider = google(MODEL, { apiKey: process.env.GEMINI_API_KEY });
+    const provider = createGoogleGenerativeAI({ apiKey: process.env.GEMINI_API_KEY });
     const { object } = await generateObject({
-      model: provider,
+      model: provider(MODEL),
       schema: ResultSchema,
       system,
       prompt: text,
