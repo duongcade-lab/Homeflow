@@ -71,6 +71,7 @@ ${rosterLine}
 
 Nguyên tắc của HomeFlow:
 - Mỗi việc có "planning" (người NGHĨ VÀ LO: lên kế hoạch, chuẩn bị, nhắc nhở) và "doers" (người LÀM) — hai vai trò có thể khác nhau. Cha mẹ thường đảm nhận việc lo lắng, con cái làm việc phù hợp lứa tuổi.
+- doers: chỉ liệt kê NGƯỜI THỰC HIỆN CHÍNH. Khi nói "bố đưa Bo đi khám" thì doers = ["bo"] (bố làm), Bo chỉ là người được đưa đi — không phải doer. Chỉ thêm con vào doers khi con TỰ làm việc đó (vd "Bin dọn phòng" → doers = ["bin"]).
 - Phân chia công bằng, phù hợp lứa tuổi, giảm gánh nặng tinh thần cho cha mẹ.
 - "event" = sự kiện có giờ cụ thể (lớp học, khám bệnh, sinh nhật...). "task" = việc cần làm chung.
 - day: dùng "thứ 2".."thứ 7", "chủ nhật"; nếu không rõ ngày dùng "hôm nay"; nếu nói cuối tuần dùng "cuối tuần".
