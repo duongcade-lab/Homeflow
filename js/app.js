@@ -96,6 +96,7 @@ const DAY_SHORT = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
     plannerDay: TODAY_IDX,
     plannerMode: "day",
     monthOffset: 0,
+    weekOffset: 0,
     taskFilter: "all",
     profileKid: null,
     detailItem: null,
@@ -871,31 +872,36 @@ function timeHint(text) {
   function weekPlanner() {
     const itemsOf = (d) => state.items.filter((it) => it.day === d);
     const total = state.items.filter((it) => !it.done).length;
-    const weekStart = TODAY_DATE - TODAY_IDX;
-    const weekEnd = weekStart + 6;
+    const isCurrent = state.weekOffset === 0;
+    const wkLabel = state.weekOffset === 0 ? "Tuần này" : state.weekOffset < 0 ? "Tuần trước" : "Tuần sau";
+    const fmt = (dt) => `${dt.getUTCDate()}/${dt.getUTCMonth() + 1}`;
+    const start = new Date(Date.UTC(TODAY_YEAR, TODAY_MONTH - 1, TODAY_DATE - TODAY_IDX + state.weekOffset * 7));
+    const end = new Date(Date.UTC(TODAY_YEAR, TODAY_MONTH - 1, TODAY_DATE - TODAY_IDX + state.weekOffset * 7 + 6));
     return `
       <div class="week-summary">
-        <span class="ws-label">Tuần này</span>
-        <span class="ws-range">${weekStart}–${weekEnd} tháng ${TODAY_MONTH}</span>
-        <span class="ws-count">${total} việc</span>
+        <span class="ws-label">${wkLabel}</span>
+        <span class="ws-range">${fmt(start)} – ${fmt(end)}</span>
+        ${isCurrent ? `<span class="ws-count">${total} việc</span>` : `<span class="ws-count ghost">Chưa có kế hoạch</span>`}
       </div>
 
-      <div class="date-nav">
-        <button class="dn-btn" data-day="prev" aria-label="Ngày trước">←</button>
-        <button class="dn-today" data-day="today">Hôm nay</button>
-        <button class="dn-btn" data-day="next" aria-label="Ngày tiếp theo">→</button>
+      <div class="week-nav">
+        <button class="wn-btn" data-wk="prev" aria-label="Tuần trước">← Tuần trước</button>
+        <button class="wn-today" data-wk="today">Hôm nay</button>
+        <button class="wn-btn" data-wk="next" aria-label="Tuần sau">Tuần sau →</button>
       </div>
 
       <div class="week-agenda">
         ${DAYS.map((d, i) => {
-          const items = itemsOf(i);
-          const dateNum = TODAY_DATE + i - TODAY_IDX;
-          const isToday = i === TODAY_IDX;
+          const items = isCurrent ? itemsOf(i) : [];
+          const dt = new Date(Date.UTC(TODAY_YEAR, TODAY_MONTH - 1, TODAY_DATE + i - TODAY_IDX + state.weekOffset * 7));
+          const dateNum = dt.getUTCDate();
+          const monthNum = dt.getUTCMonth() + 1;
+          const isToday = isCurrent && i === TODAY_IDX;
           return `
           <section class="wa-day ${isToday ? "today" : ""} ${i === state.plannerDay ? "selected" : ""}">
             <button class="wa-head" data-day="${i}" aria-label="Xem chi tiết ngày ${DAYS[i]}">
               <span class="wa-name">${DAY_SHORT[i]}</span>
-              <span class="wa-date">${dateNum}/${TODAY_MONTH}</span>
+              <span class="wa-date">${dateNum}/${monthNum}</span>
               ${isToday ? `<span class="wa-today">Hôm nay</span>` : ""}
               <span class="wa-count">${items.length} việc</span>
               <span class="wa-chev">›</span>
@@ -936,6 +942,7 @@ function timeHint(text) {
         <button class="mn-btn" data-mnav="prev" aria-label="Tháng trước">←</button>
         <span class="mn-label">Tháng ${month + 1}/${year}</span>
         <button class="mn-btn" data-mnav="next" aria-label="Tháng sau">→</button>
+        <button class="mn-today" data-mnav="today">Hôm nay</button>
       </div>
       <div class="month-grid">
         ${DAY_SHORT.map((d) => `<div class="mg-dow">${d}</div>`).join("")}
@@ -944,11 +951,6 @@ function timeHint(text) {
             <span class="mg-date">${c.date}</span>
             ${isCurrentMonth && dots[c.appDay] ? `<span class="mg-dots">${"●".repeat(Math.min(dots[c.appDay], 3))}</span>` : ""}
           </button>` : `<div class="mg-cell blank"></div>`).join("")}
-      </div>
-      <div class="date-nav">
-        <button class="dn-btn" data-day="prev" aria-label="Ngày trước">←</button>
-        <button class="dn-today" data-day="today">Hôm nay</button>
-        <button class="dn-btn" data-day="next" aria-label="Ngày tiếp theo">→</button>
       </div>
       <p class="mg-hint">Bấm vào một ngày để xem chi tiết</p>
     `;
@@ -1488,9 +1490,22 @@ function timeHint(text) {
       })
     );
 
-    $$(".mn-btn[data-mnav]").forEach((el) =>
+    $$(".mn-btn[data-mnav], .mn-today[data-mnav]").forEach((el) =>
       el.addEventListener("click", () => {
-        state.monthOffset += el.dataset.mnav === "prev" ? -1 : 1;
+        const mv = el.dataset.mnav;
+        if (mv === "prev") state.monthOffset -= 1;
+        else if (mv === "next") state.monthOffset += 1;
+        else { state.monthOffset = 0; state.plannerDay = TODAY_IDX; }
+        showView("planner");
+      })
+    );
+
+    $$(".wn-btn[data-wk], .wn-today[data-wk]").forEach((el) =>
+      el.addEventListener("click", () => {
+        const w = el.dataset.wk;
+        if (w === "prev") state.weekOffset -= 1;
+        else if (w === "next") state.weekOffset += 1;
+        else { state.weekOffset = 0; state.plannerDay = TODAY_IDX; }
         showView("planner");
       })
     );
