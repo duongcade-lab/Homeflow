@@ -6,7 +6,8 @@ import { generateObject } from "ai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { z } from "zod";
 
-const MODEL = process.env.HOME_FLOW_MODEL || "gemini-3.8-flash";
+const MODELS = (process.env.HOME_FLOW_MODEL || "gemini-3.8-flash,gemini-3.5-flash,gemini-2.5-flash-lite")
+  .split(",").map((s) => s.trim()).filter(Boolean);
 const TODAY = 4; // thứ 6 — matches the demo calendar
 
 const DAY_MAP = {
@@ -81,14 +82,26 @@ Nguyên tắc của HomeFlow:
 Trả về đúng JSON schema.`;
 
   try {
-    const provider = createGoogleGenerativeAI({ apiKey: process.env.GEMINI_API_KEY });
-    const { object } = await generateObject({
-      model: provider(MODEL),
-      schema: ResultSchema,
-      system,
-      prompt: text,
-      temperature: 0.3,
-    });
+    let object = null;
+    let lastErr = null;
+    for (const m of MODELS) {
+      try {
+        const provider = createGoogleGenerativeAI({ apiKey: process.env.GEMINI_API_KEY });
+        const r = await generateObject({
+          model: provider(m),
+          schema: ResultSchema,
+          system,
+          prompt: text,
+          temperature: 0.3,
+          maxRetries: 1,
+        });
+        object = r.object;
+        break;
+      } catch (e) {
+        lastErr = e;
+      }
+    }
+    if (!object) throw lastErr || new Error("no model available");
 
     const items = object.items
       .map((it) => ({
