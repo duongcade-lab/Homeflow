@@ -38,8 +38,8 @@
   function ageFromBirthday(bd) {
     const [d, m, y] = String(bd).split("/").map(Number);
     if (!d || !m || !y) return "";
-    let age = 2026 - y;
-    if (10 < m || (10 === m && 16 < d)) age--;
+    let age = TODAY_YEAR - y;
+    if (TODAY_MONTH < m || (TODAY_MONTH === m && TODAY_DATE < d)) age--;
     return age;
   }
 
@@ -51,8 +51,38 @@
   };
 
   const DAYS = ["thứ 2", "thứ 3", "thứ 4", "thứ 5", "thứ 6", "thứ 7", "chủ nhật"];
-  const DAY_SHORT = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
-  const TODAY_IDX = 4; // thứ 6
+const DAY_SHORT = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
+
+  /* ---------- Real clock in Asia/Ho_Chi_Minh ---------- */
+
+  const _hcm = (() => {
+    const parts = new Intl.DateTimeFormat("vi-VN", {
+      timeZone: "Asia/Ho_Chi_Minh",
+      weekday: "long", day: "numeric", month: "numeric", year: "numeric", hour: "numeric",
+    }).formatToParts(new Date());
+    const p = {};
+    parts.forEach((x) => { p[x.type] = x.value; });
+    return p;
+  })();
+  const WEEKDAY_IDX = { "thứ hai": 0, "thứ ba": 1, "thứ tư": 2, "thứ năm": 3, "thứ sáu": 4, "thứ bảy": 5, "chủ nhật": 6 };
+  const TODAY_IDX = WEEKDAY_IDX[_hcm.weekday.toLowerCase()] ?? 4;
+  const TODAY_DATE = +_hcm.day;
+  const TODAY_MONTH = +_hcm.month;
+  const TODAY_YEAR = +_hcm.year;
+  const TODAY_HOUR = +_hcm.hour;
+
+  function greetText() {
+    if (TODAY_HOUR >= 5 && TODAY_HOUR < 11) return "Chào buổi sáng, cả nhà 🌤️";
+    if (TODAY_HOUR >= 11 && TODAY_HOUR < 14) return "Chào buổi trưa, cả nhà ☀️";
+    if (TODAY_HOUR >= 14 && TODAY_HOUR < 18) return "Chào buổi chiều, cả nhà 🌇";
+    if (TODAY_HOUR >= 18 && TODAY_HOUR < 22) return "Chào buổi tối, cả nhà 🌆";
+    return "Chào buổi khuya, cả nhà 🌙";
+  }
+
+  function dateLineText(count) {
+    const day = DAYS[TODAY_IDX];
+    return `${day[0].toUpperCase()}${day.slice(1)}, ${TODAY_DATE} tháng ${TODAY_MONTH} · ${count} việc hôm nay`;
+  }
 
   const state = {
     view: "home",
@@ -330,8 +360,8 @@
       <header class="app-header">
         <div class="header-row">
           <div>
-            <div class="greet">Chào buổi sáng, cả nhà 🌤️</div>
-            <div class="date-line" id="date-line">Thứ 6, 16 tháng 10 · ${today.length + doneToday} việc hôm nay</div>
+            <div class="greet">${greetText()}</div>
+            <div class="date-line" id="date-line">${dateLineText(today.length + doneToday)}</div>
           </div>
           <div class="family-avatars">
             ${MEMBERS.map((m) => avatarHtml(m)).join("")}
@@ -798,7 +828,7 @@ function timeHint(text) {
         ${DAYS.map((d, i) => `
           <button class="wday ${i === TODAY_IDX ? "today" : ""} ${i === state.plannerDay ? "selected" : ""}" data-day="${i}">
             <div class="wd-name">${DAY_SHORT[i]}</div>
-            <div class="wd-num">${i === TODAY_IDX ? "Hôm nay" : (16 + i - TODAY_IDX)}</div>
+            <div class="wd-num">${i === TODAY_IDX ? "Hôm nay" : (TODAY_DATE + i - TODAY_IDX)}</div>
             <div class="wd-dots">${dots[i] ? `<i></i>${dots[i] > 1 ? "<i></i>" : ""}${dots[i] > 3 ? "<i></i>" : ""}` : ""}</div>
           </button>`).join("")}
       </div>
@@ -1593,7 +1623,7 @@ function timeHint(text) {
     const dl = $("#date-line");
     if (dl) {
       const today = state.items.filter((it) => it.day === TODAY_IDX);
-      dl.textContent = `Thứ 6, 16 tháng 10 · ${today.length} việc hôm nay`;
+      dl.textContent = dateLineText(today.length);
     }
   }
 
