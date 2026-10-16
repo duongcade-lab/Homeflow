@@ -1,11 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": "other",
-  "buildCommand": "echo 'HomeFlow static site — no build step'",
-  "functions": {
-    "api/parse.mjs": {
-      "runtime": "nodejs20.x",
-      "maxDuration": 30
-    }
-  }
+  "framework": null,
+  "buildCommand": "echo 'HomeFlow static site — no build step'"
 }
