@@ -112,7 +112,14 @@ Trả về đúng JSON schema.`;
     }
     return res.status(200).json({ items, summary: object.summary || "" });
   } catch (err) {
-    console.error("[HomeFlow] LLM parse failed:", err instanceof Error ? err.message : String(err));
-    return res.status(500).json({ error: "AI Gateway temporarily unavailable" });
+    const sanitize = (s) => String(s).replace(/[A-Za-z0-9_-]{20,}/g, "[redacted]");
+    const status = err && typeof err.status === "number" ? err.status : "";
+    const msg = sanitize(err instanceof Error ? err.message : String(err));
+    console.error("[HomeFlow] LLM parse failed:", status, msg);
+    const keySet = !!process.env.AI_GATEWAY_API_KEY;
+    return res.status(500).json({
+      error: "AI Gateway temporarily unavailable",
+      detail: keySet ? `${status} ${msg}` : "AI_GATEWAY_API_KEY not set",
+    });
   }
 }
