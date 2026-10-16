@@ -483,7 +483,9 @@ function timeOf(text) {
   const m = text.match(/(?:lúc\s*)?(\d{1,2})\s*(?:h|giờ)(?:\s*(\d{2}))?/)
     || text.match(/(\d{1,2}):(\d{2})/);
   if (!m) return null;
-  return `${String(+m[1]).padStart(2, "0")}:${m[2] || "00"}`;
+  let h = +m[1];
+  if (h < 12 && (text.includes("chiều") || text.includes("tối"))) h += 12;
+  return `${String(h).padStart(2, "0")}:${m[2] || "00"}`;
 }
 
 function timeHint(text) {
@@ -500,12 +502,22 @@ function timeHint(text) {
     const items = [];
     const clauses = text.split(/[.,;!]/).map((c) => c.trim()).filter(Boolean);
 
-    const NAME_IDS = [["bố", "bo"], ["ba", "bo"], ["mẹ", "me"], ["má", "me"], ["bin", "bin"], ["su", "su"]];
-    const personNear = (clause, kw) => {
+    // Dynamic aliases from MEMBERS — recognises renamed kids ("Bo", "Bạn lớn", …)
+    const ALIASES = [];
+    MEMBERS.forEach((m) => {
+      const words = [m.name.toLowerCase(), m.role.toLowerCase()];
+      if (m.id === "bo") words.push("bố", "ba", "cha");
+      if (m.id === "me") words.push("mẹ", "má");
+      words.forEach((w) => ALIASES.push([w, m.id]));
+    });
+    const KID_IDS = kids().map((k) => k.id);
+
+    const personNear = (clause, kw, pool) => {
       const idx = clause.indexOf(kw);
       if (idx === -1) return null;
       let best = null, bestDist = Infinity;
-      for (const [nm, id] of NAME_IDS) {
+      for (const [nm, id] of ALIASES) {
+        if (pool && !pool.includes(id)) continue;
         let pos = clause.indexOf(nm);
         while (pos !== -1) {
           const d = Math.abs(pos - idx);
@@ -515,11 +527,51 @@ function timeHint(text) {
       }
       return best;
     };
+    // Who drives / pays / takes — practically always a parent.
+    const parentNear = (clause, kw) => personNear(clause, kw, ["me", "bo"]);
+
+    // Which kid is being talked about, nearest to an anchor verb.
+    const kidIn = (clause, anchor) => {
+      const idx = clause.indexOf(anchor);
+      if (idx === -1) return null;
+      let best = null, bestDist = Infinity;
+      KID_IDS.forEach((id) => {
+        const m = member(id);
+        [m.name.toLowerCase(), m.role.toLowerCase()].forEach((a) => {
+          let pos = clause.indexOf(a);
+          while (pos !== -1) {
+            const d = Math.abs(pos - idx);
+            if (d < bestDist) { bestDist = d; best = id; }
+            pos = clause.indexOf(a, pos + 1);
+          }
+        });
+      });
+      return best;
+    };
+    const kidLabel = (clause) => {
+      const anchor = ["đưa", "đón", "chở", "học", "đi"].find((kw) => clause.includes(kw)) || "đi";
+      const id = kidIn(clause, anchor);
+      if (id) return member(id).role;
+      // Unrecognised name — echo it instead of generic "con" ("Bo đi công viên").
+      const m = clause.match(/(?:đưa|đón|chở|cho)\s+([a-zà-ỹ]{2,})/);
+      if (m && !["bố", "ba", "cha", "mẹ", "má"].includes(m[1])) {
+        return m[1][0].toUpperCase() + m[1].slice(1);
+      }
+      return "con";
+    };
+    const ownerOf = (clause) => {
+      const own = clause.match(/việc của ([a-zà-ỹ]+)/);
+      if (own) {
+        const hit = ALIASES.find(([a]) => a === own[1]);
+        if (hit) return hit[1];
+      }
+      return null;
+    };
     const plannerOf = (clause) => {
-      const p = personNear(clause, "nhớ");
+      const p = parentNear(clause, "nhớ");
       if (p) return p;
-      const own = clause.match(/việc của (bố|ba|mẹ|má|bin|su)/);
-      if (own) return { bố: "bo", ba: "bo", mẹ: "me", má: "me", bin: "bin", su: "su" }[own[1]];
+      const o = ownerOf(clause);
+      if (o) return o;
       return "me";
     };
 
@@ -528,8 +580,8 @@ function timeHint(text) {
       const push = (it) => { items.push(it); made = true; };
 
       if (clause.includes("tiếng anh") || clause.includes("lớp") || clause.includes("đi học")) {
-        const who = clause.includes("bin") ? "Bin" : clause.includes("su") ? "Su" : "con";
-        const doer = personNear(clause, "đưa") || personNear(clause, "đón") || personNear(clause, "chở") || "bo";
+        const who = kidLabel(clause);
+        const doer = parentNear(clause, "đưa") || parentNear(clause, "đón") || parentNear(clause, "chở") || "bo";
         let title, emoji;
         if (clause.includes("tiếng anh")) {
           title = `Lớp tiếng Anh của ${who}`;
@@ -545,14 +597,14 @@ function timeHint(text) {
           }
         }
         push({
-          kind: "event", title, day: dayFor(text, "học"), time: timeHint(text),
+          kind: "event", title, day: dayFor(clause, "học"), time: timeHint(clause),
           cat: "school", emoji, planning: plannerOf(clause), doers: [doer],
         });
       }
 
       if (clause.includes("sinh nhật")) {
-        const doer = personNear(clause, "mua") || "all";
-        const giftDay = clause.includes("mua quà") ? dayFor(text, "mua quà") : Math.max(dayFor(text, "sinh nhật") - 1, 0);
+        const doer = parentNear(clause, "mua") || "all";
+        const giftDay = clause.includes("mua quà") ? dayFor(clause, "mua quà") : Math.max(dayFor(clause, "sinh nhật") - 1, 0);
         push({
           kind: "task", title: "Mua quà sinh nhật bà", day: giftDay,
           cat: "event", emoji: "🛍️", planning: plannerOf(clause), doers: [doer],
@@ -560,29 +612,29 @@ function timeHint(text) {
       }
 
       if (clause.includes("khám")) {
-        const doer = personNear(clause, "đưa") || personNear(clause, "đón") || personNear(clause, "khám") || "bo";
+        const doer = parentNear(clause, "đưa") || parentNear(clause, "đón") || parentNear(clause, "khám") || "bo";
         push({
-          kind: "event", title: "Đi khám", day: dayFor(text, "khám"), time: timeHint(text),
+          kind: "event", title: `${kidLabel(clause)} đi khám`, day: dayFor(clause, "khám"), time: timeHint(clause),
           cat: "school", emoji: "🦷", planning: plannerOf(clause), doers: [doer],
         });
       }
 
       if (clause.includes("học phí") || clause.includes("tiền") || clause.includes("đóng") || clause.includes("nộp")) {
-        const doer = personNear(clause, "đóng") || personNear(clause, "nộp") || personNear(clause, "tiền") || "me";
+        const doer = parentNear(clause, "đóng") || parentNear(clause, "nộp") || parentNear(clause, "tiền") || "me";
         push({
-          kind: "task", title: "Thanh toán hóa đơn", day: dayFor(text, "thanh toán"),
+          kind: "task", title: "Thanh toán hóa đơn", day: dayFor(clause, "thanh toán"),
           cat: "bill", emoji: "💳", planning: plannerOf(clause), doers: [doer],
         });
       }
 
       if (clause.includes("quê") || clause.includes("thăm")) {
         push({
-          kind: "event", title: "Về quê thăm ông bà", day: dayFor(text, "quê"),
+          kind: "event", title: "Về quê thăm ông bà", day: dayFor(clause, "quê"),
           cat: "event", emoji: "🏡", planning: plannerOf(clause), doers: ["all"],
         });
         if (clause.includes("xăng")) {
           push({
-            kind: "task", title: "Đổ đầy xăng", day: dayFor(text, "xăng"),
+            kind: "task", title: "Đổ đầy xăng", day: dayFor(clause, "xăng"),
             cat: "bill", emoji: "⛽", planning: plannerOf(clause), doers: ["bo"],
           });
         }
@@ -590,41 +642,41 @@ function timeHint(text) {
 
       // Pick-up: "X đón Y" (khi chưa có việc khác trong câu)
       if (!made && clause.includes("đón")) {
-        const doer = personNear(clause, "đón") || "me";
-        const who = clause.includes("bin") ? "Bin" : clause.includes("su") ? "Su" : "con";
+        const doer = parentNear(clause, "đón") || "me";
+        const who = kidLabel(clause);
         push({
-          kind: "event", title: `Đón ${who}`, day: dayFor(text, "đón"), time: timeHint(text),
+          kind: "event", title: `Đón ${who}`, day: dayFor(clause, "đón"), time: timeHint(clause),
           cat: "home", emoji: "🚙", planning: plannerOf(clause), doers: [doer],
         });
       }
 
       // Generic activity: "X đi <hoạt động>" (đá bóng, bơi, học vẽ, chơi…)
       if (!made) {
-        const m = clause.match(/(?:^|\s)đi ([a-zà-ỹ]+(?:\s[a-zà-ỹ]+)*)/);
+        const m = clause.match(/(?:^|\s)đi ([a-zà-ỹ]+(?:\s[a-zà-ỹ]+)*?)(?=\s*(?:lúc|vào|buổi|sáng|chiều|tối|\d)|$)/);
         if (m) {
-          const act = m[1];
-          const who = clause.includes("bin") ? "Bin" : clause.includes("su") ? "Su" : "con";
-          const doer = personNear(clause, "đưa") || personNear(clause, "đón") || personNear(clause, "chở") || "bo";
-          const ACT_EMOJI = {
-            "đá bóng": "⚽", "bơi": "🏊", "học vẽ": "🎨", "đàn": "🎹",
-            "chơi": "🎮", "xem phim": "🎬", "dã ngoại": "🏕️", "công viên": "🌳",
-            "siêu thị": "🛒", "chùa": "🙏", "câu cá": "🎣",
-          };
-          const emoji = Object.keys(ACT_EMOJI).find((k) => act.includes(k)) ? ACT_EMOJI[Object.keys(ACT_EMOJI).find((k) => act.includes(k))] : "🎯";
-          push({
-            kind: "event", title: `${who} đi ${act}`, day: dayFor(text, "đi"), time: timeHint(text),
-            cat: "event", emoji, planning: plannerOf(clause), doers: [doer],
-          });
+          const act = m[1].replace(/\s*lúc.*$/i, "").trim();
+          if (act) {
+            const who = kidLabel(clause);
+            const doer = parentNear(clause, "đưa") || parentNear(clause, "đón") || parentNear(clause, "chở") || "bo";
+            const ACT_EMOJI = {
+              "đá bóng": "⚽", "bơi": "🏊", "học vẽ": "🎨", "đàn": "🎹",
+              "chơi": "🎮", "xem phim": "🎬", "dã ngoại": "🏕️", "công viên": "🌳",
+              "siêu thị": "🛒", "chùa": "🙏", "câu cá": "🎣",
+            };
+            const emoji = Object.keys(ACT_EMOJI).find((k) => act.includes(k)) ? ACT_EMOJI[Object.keys(ACT_EMOJI).find((k) => act.includes(k))] : "🎯";
+            push({
+              kind: "event", title: `${who} đi ${act}`, day: dayFor(clause, "đi"), time: timeHint(clause),
+              cat: "event", emoji, planning: plannerOf(clause), doers: [doer],
+            });
+          }
         }
       }
     });
 
     if (!items.length) {
-      const own = text.match(/việc của (bố|ba|mẹ|má|bin|su)/);
-      const doer = own ? { bố: "bo", ba: "bo", mẹ: "me", má: "me", bin: "bin", su: "su" }[own[1]]
-        : personNear(text, "việc") || personNear(text, "của") || "me";
-      const title = own ? `Việc của ${own[1] === "ba" ? "Bố" : own[1] === "má" ? "Mẹ" : own[1][0].toUpperCase() + own[1].slice(1)}`
-        : "Việc cần làm";
+      const o = ownerOf(text);
+      const doer = o || parentNear(text, "việc") || parentNear(text, "của") || "me";
+      const title = o ? `Việc của ${member(o).name}` : "Việc cần làm";
       items.push({
         kind: "task", title, day: TODAY_IDX,
         cat: "home", emoji: "📌", planning: plannerOf(text), doers: [doer],
@@ -702,6 +754,10 @@ function timeHint(text) {
         ${ownersHtml(it)}
         <div class="pi-editor" data-idx="${idx}" hidden>
           <div class="owner-edit">
+            <span class="oe-label">📝 Tiêu đề:</span>
+            <input class="mini-text" type="text" data-role="title" data-idx="${idx}" value="${esc(it.title)}" maxlength="60">
+          </div>
+          <div class="owner-edit">
             <span class="oe-label">🧠 Nghĩ và lo:</span>
             <select class="mini-select planning" data-role="planning" data-idx="${idx}">
               ${MEMBERS.map((m) => `<option value="${m.id}" ${m.id === it.planning ? "selected" : ""}>${m.name}</option>`).join("")}
@@ -717,7 +773,7 @@ function timeHint(text) {
             <select class="mini-select day" data-role="day" data-idx="${idx}">
               ${DAYS.map((d, i) => `<option value="${i}" ${i === it.day ? "selected" : ""}>${d}</option>`).join("")}
             </select>
-            ${it.kind === "event" ? `<span class="oe-label">· 🕘 Giờ:</span><input class="mini-time" type="time" data-role="time" data-idx="${idx}" value="${it.time || "09:00"}">` : ""}
+            <span class="oe-label">· 🕘 Giờ:</span><input class="mini-time" type="time" data-role="time" data-idx="${idx}" value="${it.time || "09:00"}">
           </div>
         </div>
       </article>`;
@@ -1423,6 +1479,18 @@ function timeHint(text) {
         inp.addEventListener("change", () => {
           const it = state.parseResult[+inp.dataset.idx];
           it.time = inp.value || null;
+        })
+      );
+      $$(".mini-text").forEach((inp) =>
+        inp.addEventListener("change", () => {
+          const it = state.parseResult[+inp.dataset.idx];
+          const v = inp.value.trim();
+          if (v && v !== it.title) {
+            it.title = v;
+            const card = inp.closest(".parse-item");
+            const tt = card && card.querySelector(".task-title");
+            if (tt) tt.textContent = `${it.emoji} ${it.title}`;
+          }
         })
       );
       $("#confirm-save").addEventListener("click", () => {
