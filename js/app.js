@@ -1045,7 +1045,6 @@ function timeHint(text) {
 
   VIEWS.rebalance = () => {
     const { totals, pcts, sum } = loadTotals();
-    const avg = avgPct(pcts);
     const targets = state.items.filter((it) => ["i2", "i3", "i13"].includes(it.id)); // Đóng tiền điện + Mua quà + Học phí
     const from = member("me");
     const to = member("bo");
@@ -1084,12 +1083,12 @@ function timeHint(text) {
 
       <div class="rb-hero">
         <span class="rb-emoji">😮💨</span>
-        <strong>${from.name} đang gánh ${pcts.me}% — cao hơn điểm cân bằng ${avg}%</strong>
-        <p>Không phải vì ${from.name} giỏi hơn, mà vì phần <b>nghĩ và lo</b> đang dồn về một người. Hãy chia sẻ phần <b>làm</b> — còn phần nhớ vẫn thuộc về ${from.name}.</p>
+        <strong>Tuần này, phần lớn việc phải nhớ và lên kế hoạch đang tập trung vào ${from.name} 💭</strong>
+        <p>${from.name} đang gánh ${pcts.me}% — không phải vì ai giỏi hơn, mà vì phần <b>nghĩ và lo</b> đang dồn về một người. Cùng chia sẻ một vài việc để tuần tới nhẹ nhàng hơn nhé.</p>
       </div>
 
       <div class="rb-suggest">
-        <div class="eyebrow">Gợi ý của HomeFlow</div>
+        <div class="eyebrow">💜 HomeFlow gợi ý</div>
         <div class="rb-transfer">
           <div class="rt-person">
             <div class="rt-ava" style="background:${from.soft}">${from.emoji}</div>
