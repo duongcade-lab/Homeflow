@@ -1,5 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "buildCommand": "echo 'HomeFlow static site — no build step'"
+  "buildCommand": "echo 'HomeFlow static site — no build step'",
+  "outputDirectory": "."
 }
