@@ -886,7 +886,7 @@ function timeHint(text) {
 
       <div class="week-nav">
         <button class="wn-btn" data-wk="prev" aria-label="Tuần trước">← Tuần trước</button>
-        <button class="wn-today" data-wk="today">Hôm nay</button>
+        <button class="wn-today" data-wk="today">Tuần này</button>
         <button class="wn-btn" data-wk="next" aria-label="Tuần sau">Tuần sau →</button>
       </div>
 
@@ -942,7 +942,7 @@ function timeHint(text) {
         <button class="mn-btn" data-mnav="prev" aria-label="Tháng trước">←</button>
         <span class="mn-label">Tháng ${month + 1}/${year}</span>
         <button class="mn-btn" data-mnav="next" aria-label="Tháng sau">→</button>
-        <button class="mn-today" data-mnav="today">Hôm nay</button>
+        <button class="mn-today" data-mnav="today">Tháng này</button>
       </div>
       <div class="month-grid">
         ${DAY_SHORT.map((d) => `<div class="mg-dow">${d}</div>`).join("")}
