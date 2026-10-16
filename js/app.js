@@ -862,26 +862,56 @@ function timeHint(text) {
     `;
   }
 
-  function weekPlanner(dots) {
+  function ownersMini(it) {
+    const pl = member(it.planning).name;
+    const dl = doersLabel(it.doers).label;
+    return `${pl} nghĩ · ${dl} làm`;
+  }
+
+  function weekPlanner() {
     const itemsOf = (d) => state.items.filter((it) => it.day === d);
+    const total = state.items.filter((it) => !it.done).length;
+    const weekStart = TODAY_DATE - TODAY_IDX;
+    const weekEnd = weekStart + 6;
     return `
-      <div class="week-grid">
-        ${DAYS.map((d, i) => `
-          <button class="wg-col ${i === state.plannerDay ? "selected" : ""} ${i === TODAY_IDX ? "today" : ""}" data-day="${i}">
-            <div class="wg-head">
-              <span class="wg-name">${DAY_SHORT[i]}</span>
-              <span class="wg-num">${i === TODAY_IDX ? "Hôm nay" : (TODAY_DATE + i - TODAY_IDX)}</span>
-            </div>
-            <div class="wg-body">
-              ${itemsOf(i).map((it) => `<div class="wg-item"><span class="wg-emoji">${it.emoji}</span><span class="wg-title">${esc(it.title)}</span>${it.time ? `<span class="wg-time">${it.time}</span>` : ""}</div>`).join("")}
-              ${!itemsOf(i).length ? `<div class="wg-empty">—</div>` : ""}
-            </div>
-          </button>`).join("")}
+      <div class="week-summary">
+        <span class="ws-label">Tuần này</span>
+        <span class="ws-range">${weekStart}–${weekEnd} tháng ${TODAY_MONTH}</span>
+        <span class="ws-count">${total} việc</span>
       </div>
+
       <div class="date-nav">
         <button class="dn-btn" data-day="prev" aria-label="Ngày trước">←</button>
         <button class="dn-today" data-day="today">Hôm nay</button>
         <button class="dn-btn" data-day="next" aria-label="Ngày tiếp theo">→</button>
+      </div>
+
+      <div class="week-agenda">
+        ${DAYS.map((d, i) => {
+          const items = itemsOf(i);
+          const dateNum = TODAY_DATE + i - TODAY_IDX;
+          const isToday = i === TODAY_IDX;
+          return `
+          <section class="wa-day ${isToday ? "today" : ""} ${i === state.plannerDay ? "selected" : ""}">
+            <button class="wa-head" data-day="${i}" aria-label="Xem chi tiết ngày ${DAYS[i]}">
+              <span class="wa-name">${DAY_SHORT[i]}</span>
+              <span class="wa-date">${dateNum}/${TODAY_MONTH}</span>
+              ${isToday ? `<span class="wa-today">Hôm nay</span>` : ""}
+              <span class="wa-count">${items.length} việc</span>
+              <span class="wa-chev">›</span>
+            </button>
+            <div class="wa-body">
+              ${items.length ? items.map((it) => `
+                <div class="wa-item">
+                  <span class="wa-time">${it.time || "cả ngày"}</span>
+                  <span class="wa-emoji">${it.emoji}</span>
+                  <span class="wa-title">${esc(it.title)}</span>
+                  <span class="wa-owners">${ownersMini(it)}</span>
+                </div>`).join("") : `
+                <div class="wa-empty">🌿 Ngày nhẹ nhàng</div>`}
+            </div>
+          </section>`;
+        }).join("")}
       </div>
       <p class="mg-hint">Bấm vào một ngày để xem chi tiết</p>
     `;
@@ -1442,7 +1472,7 @@ function timeHint(text) {
       })
     );
 
-    $$(".wg-col[data-day]").forEach((el) =>
+    $$(".wa-head[data-day]").forEach((el) =>
       el.addEventListener("click", () => {
         state.plannerDay = +el.dataset.day;
         state.plannerMode = "day";

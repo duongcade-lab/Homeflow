@@ -885,43 +885,146 @@ textarea.dump-input::placeholder { color: var(--ink-faint); }
   box-shadow: var(--shadow-pop);
 }
 
-.week-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
+.week-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin-top: 16px;
+  padding: 0 2px;
 }
-.week-grid .wg-col {
+.week-summary .ws-label {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+}
+.week-summary .ws-range {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+.week-summary .ws-count {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--primary-deep);
+  background: var(--lavender);
+  border-radius: var(--r-pill);
+  padding: 4px 10px;
+}
+
+.week-agenda {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  border: none;
-  border-radius: 16px;
-  padding: 8px 4px;
+  gap: 10px;
+  margin-top: 14px;
+}
+.week-agenda .wa-day {
   background: var(--cream-card);
+  border-radius: var(--r-lg);
   box-shadow: var(--shadow-soft);
+  overflow: hidden;
+  transition: all .2s var(--ease);
+}
+.week-agenda .wa-day.today {
+  background: var(--lavender);
+  box-shadow: var(--shadow-pop);
+}
+.week-agenda .wa-day.selected { outline: 2.5px solid var(--lavender-deep); }
+.week-agenda .wa-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  padding: 11px 14px;
   cursor: pointer;
   text-align: left;
-  font-family: inherit;
-  transition: all .2s var(--ease);
-  min-height: 120px;
+  transition: background .2s var(--ease);
 }
-.week-grid .wg-col.today { background: var(--lavender); }
-.week-grid .wg-col.selected { outline: 2.5px solid var(--lavender-deep); }
-.week-grid .wg-head { display: flex; flex-direction: column; gap: 1px; }
-.week-grid .wg-name { font-size: 10px; font-weight: 800; color: var(--ink-soft); text-transform: uppercase; }
-.week-grid .wg-num { font-family: var(--font-display); font-weight: 700; font-size: 14px; }
-.week-grid .wg-body { display: flex; flex-direction: column; gap: 4px; }
-.week-grid .wg-item {
-  display: flex; align-items: center; gap: 3px;
-  font-size: 9.5px; font-weight: 700; line-height: 1.25;
+.week-agenda .wa-head:hover { background: rgba(116, 66, 168, .07); }
+.week-agenda .wa-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+  min-width: 30px;
+}
+.week-agenda .wa-date {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+.week-agenda .wa-today {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--white);
+  background: var(--primary);
+  border-radius: var(--r-pill);
+  padding: 3px 9px;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+}
+.week-agenda .wa-count {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--ink-soft);
+}
+.week-agenda .wa-day.today .wa-count { color: var(--primary-deep); }
+.week-agenda .wa-chev {
+  color: var(--ink-faint);
+  font-size: 16px;
+  font-weight: 800;
+}
+.week-agenda .wa-body {
+  padding: 2px 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.week-agenda .wa-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   background: var(--white);
-  border-radius: 8px;
-  padding: 3px 4px;
+  border-radius: 12px;
+  padding: 8px 10px;
   box-shadow: var(--shadow-soft);
 }
-.week-grid .wg-time { color: var(--primary-deep); font-weight: 800; margin-left: auto; }
-.week-grid .wg-empty { color: var(--ink-faint); font-size: 11px; text-align: center; padding-top: 8px; }
+.week-agenda .wa-time {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: var(--primary-deep);
+  background: var(--lavender);
+  border-radius: var(--r-pill);
+  padding: 3px 7px;
+  white-space: nowrap;
+}
+.week-agenda .wa-emoji { font-size: 15px; flex-shrink: 0; }
+.week-agenda .wa-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 12.5px;
+  font-weight: 800;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.week-agenda .wa-owners {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+.week-agenda .wa-empty {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-faint);
+  text-align: center;
+  padding: 8px 0 4px;
+}
 
 .month-head {
   display: flex;
