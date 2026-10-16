@@ -6,7 +6,7 @@ import { generateObject } from "ai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { z } from "zod";
 
-const MODELS = (process.env.HOME_FLOW_MODEL || "gemini-3.8-flash,gemini-3.5-flash,gemini-2.5-flash-lite")
+const MODELS = (process.env.HOME_FLOW_MODEL || "gemini-3.8-flash,gemini-3.5-flash,gemini-3.5-flash-lite")
   .split(",").map((s) => s.trim()).filter(Boolean);
 const TODAY = 4; // thứ 6 — matches the demo calendar
 
