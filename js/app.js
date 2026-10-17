@@ -297,7 +297,10 @@ const DAY_SHORT = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
       ov.innerHTML = `
         <div class="video-stage">
           <button class="video-close" id="video-close" aria-label="Đóng video">✕</button>
-          <video id="demo-video" src="videos/demo.mp4" controls playsinline preload="metadata"></video>
+          <video id="demo-video" controls playsinline preload="metadata">
+            <source src="videos/demo.mp4?v=2" type='video/mp4; codecs="avc1.42E01E,mp4a.40.2"'>
+            <source src="videos/demo-vp9.mp4?v=2" type='video/mp4; codecs="vp09.00.10.08"'>
+          </video>
           <div class="video-endpanel" id="video-endpanel" hidden>
             <div class="vp-title">Bạn muốn thử ngay?</div>
             <button class="btn-primary vp-try" id="vp-try">✨ Nói với HomeFlow</button>
