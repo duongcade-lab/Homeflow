@@ -524,14 +524,6 @@ const DAY_SHORT = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
           <button class="ob-later" id="ob-later">Để sau</button>
         </div>
       </div>` : ""}
-
-      <div class="help-area">
-        <div class="help-head">❓ Trợ giúp</div>
-        <button class="help-item" data-help="guide">🚀 Bắt đầu với HomeFlow</button>
-        <button class="help-item" data-help="video">▶ Xem Video Demo</button>
-        <button class="help-item" data-help="po">🧠 Planning Owner là gì?</button>
-        <button class="help-item" data-help="fb">⚖️ Family Balance hoạt động thế nào?</button>
-      </div>
     `;
   };
 
@@ -1307,6 +1299,22 @@ function timeHint(text) {
       }).join("")}
     `;
   };
+
+  /* ---------- 9. Trợ giúp (Help) ---------- */
+
+  VIEWS.help = () => `
+    <div class="eyebrow gold">Trợ giúp</div>
+    <h2 class="h-title">HomeFlow giúp cả nhà thế nào?</h2>
+    <p class="h-sub">Xem nhanh hoặc học từng bước — thoải mái chọn nhé.</p>
+    <div class="help-area">
+      <div class="help-head">Bắt đầu</div>
+      <button class="help-item" data-help="guide">🚀 Bắt đầu với HomeFlow</button>
+      <button class="help-item" data-help="video">▶ Xem Video Demo</button>
+      <div class="help-head">Tìm hiểu</div>
+      <button class="help-item" data-help="po">🧠 Planning Owner là gì?</button>
+      <button class="help-item" data-help="fb">⚖️ Family Balance hoạt động thế nào?</button>
+    </div>
+  `;
 
   /* ---------- 9b. Kids' Profiles (Hồ sơ con) ---------- */
 
