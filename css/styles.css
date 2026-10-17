@@ -547,7 +547,8 @@ button:focus-visible, .chip:focus-visible, .owner:focus-visible, .mission:focus-
 }
 .video-stage video {
   width: 100%;
-  aspect-ratio: 516 / 956;
+  aspect-ratio: 80 / 167;
+  object-fit: fill;
   border-radius: 18px;
   background: #000;
   display: block;
